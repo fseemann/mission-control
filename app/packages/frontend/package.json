@@ -1,0 +1,21 @@
+{
+  "name": "@mc/frontend",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@mc/shared": "workspace:*",
+    "react": "^18",
+    "react-dom": "^18",
+    "reactflow": "^11",
+    "zustand": "^4"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "vite": "^5",
+    "@vitejs/plugin-react": "^4"
+  }
+}
