@@ -132,7 +132,6 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
 
       {/* Header bar */}
       <div className="milestone-node-header">
-        <span className="milestone-node-icon">🎯</span>
         <h4 className="milestone-node-title" title={element.label}>
           {element.label || 'Goal Milestone'}
         </h4>

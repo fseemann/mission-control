@@ -126,12 +126,20 @@ const Canvas: React.FC = () => {
     });
 
     setEdges(
-      validEdges.map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        label: e.label,
-      })) as FlowEdge[]
+      validEdges.map((e) => {
+        const sourceWidget = widgets.get(e.source);
+        const targetWidget = widgets.get(e.target);
+        const sourceZ = sourceWidget?.style?.zIndex ?? (sourceWidget?.type === 'rectangle' ? 0 : 1);
+        const targetZ = targetWidget?.style?.zIndex ?? (targetWidget?.type === 'rectangle' ? 0 : 1);
+        const zIndex = Math.min(sourceZ, targetZ);
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          label: e.label,
+          zIndex,
+        };
+      }) as FlowEdge[]
     );
   }, [edges, widgets, setEdges]);
 
