@@ -11,6 +11,7 @@ import ReactFlow, {
   Node as FlowNode,
   ReactFlowProvider,
   useReactFlow,
+  Viewport,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -44,6 +45,29 @@ const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { project } = useReactFlow();
 
+  const [initialViewport] = React.useState<Viewport | undefined>(() => {
+    const saved = localStorage.getItem('mission-control:viewport');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (
+          typeof parsed.x === 'number' &&
+          typeof parsed.y === 'number' &&
+          typeof parsed.zoom === 'number'
+        ) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error('Failed to parse saved viewport from localStorage:', e);
+      }
+    }
+    return undefined;
+  });
+
+  const onMoveEnd = useCallback((_event: any, viewport: Viewport) => {
+    localStorage.setItem('mission-control:viewport', JSON.stringify(viewport));
+  }, []);
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [rfEdges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -60,9 +84,9 @@ const Canvas: React.FC = () => {
           data: w,
           selected: isSelected,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
-          style: w.type === 'rectangle' ? {
-            width: w.style?.width ?? 200,
-            height: w.style?.height ?? 150,
+          style: (w.type === 'rectangle' || w.type === 'label') ? {
+            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : 150),
+            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : 60),
           } : undefined,
         } as FlowNode;
       })
@@ -121,6 +145,8 @@ const Canvas: React.FC = () => {
             style: {
               fontSize: 16,
               color: '#111827',
+              width: 150,
+              height: 60,
             },
           },
         });
@@ -257,7 +283,9 @@ const Canvas: React.FC = () => {
         onEdgesDelete={onEdgesDelete}
         onPaneClick={onPaneClick}
         elevateNodesOnSelect={false}
-        fitView
+        defaultViewport={initialViewport}
+        fitView={!initialViewport}
+        onMoveEnd={onMoveEnd}
       >
         <Background variant={BackgroundVariant.Dots} color="#D1D5DB" gap={16} size={1} />
         <Controls position="top-right" />

@@ -1,14 +1,29 @@
 import React from 'react';
-import { NodeProps } from 'reactflow';
+import { NodeResizer, NodeProps } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 
 export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
+  const send = useWidgetStore((state) => state.send);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     selectWidget(id);
+  };
+
+  const onResizeEnd = (event: any, params: { width: number; height: number }) => {
+    send({
+      type: 'widget:update',
+      id,
+      payload: {
+        style: {
+          ...element.style,
+          width: params.width,
+          height: params.height,
+        },
+      },
+    });
   };
 
   const style = element.style || {};
@@ -24,7 +39,16 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
       }}
       onDoubleClick={handleDoubleClick}
     >
-      {element.label || 'Double-click to edit text'}
+      <NodeResizer
+        color="var(--accent)"
+        minWidth={50}
+        minHeight={30}
+        isVisible={selected}
+        onResizeEnd={onResizeEnd}
+      />
+      <div>
+        {element.label || 'Double-click to edit text'}
+      </div>
     </div>
   );
 };

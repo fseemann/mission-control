@@ -92,6 +92,14 @@ export const ConfigPanel: React.FC = () => {
     }
   }, [widget]);
 
+  // Sync width/height from store updates (e.g., when resized on canvas)
+  useEffect(() => {
+    if (widget && widget.style) {
+      if (widget.style.width !== undefined) setWidth(widget.style.width);
+      if (widget.style.height !== undefined) setHeight(widget.style.height);
+    }
+  }, [widget?.style?.width, widget?.style?.height]);
+
   if (!widget) {
     return (
       <div className="config-panel">
@@ -163,6 +171,8 @@ export const ConfigPanel: React.FC = () => {
     if (isLabel) {
       stylePayload.fontSize = Number(fontSize);
       stylePayload.color = color;
+      stylePayload.width = Number(width);
+      stylePayload.height = Number(height);
     } else if (isRectangle) {
       stylePayload.width = Number(width);
       stylePayload.height = Number(height);
@@ -427,32 +437,35 @@ export const ConfigPanel: React.FC = () => {
             </>
           )}
 
+          {/* Label & Rectangle Dimensions */}
+          {(isLabel || isRectangle) && (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label className="form-label">Width (px)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={width}
+                  onChange={(e) => setWidth(Number(e.target.value))}
+                  min={40}
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label className="form-label">Height (px)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={height}
+                  onChange={(e) => setHeight(Number(e.target.value))}
+                  min={30}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Rectangle Specific Fields */}
           {isRectangle && (
             <>
-              {/* Dimensions */}
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">Width (px)</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={width}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    min={50}
-                  />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">Height (px)</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={height}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                    min={50}
-                  />
-                </div>
-              </div>
 
               {/* Background Color Picker / Presets */}
               <div className="form-group">
