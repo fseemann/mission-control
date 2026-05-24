@@ -725,3 +725,39 @@ body, html, #root {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* Layer Controls styling */
+.layer-badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: #F3F4F6;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  font-family: monospace;
+}
+
+.layer-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.layer-btn {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.layer-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}

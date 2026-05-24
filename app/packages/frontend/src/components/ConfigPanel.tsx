@@ -104,6 +104,11 @@ export const ConfigPanel: React.FC = () => {
   const isLabel = widget.type === 'label';
   const isRectangle = widget.type === 'rectangle';
 
+  const allZIndexes = Array.from(widgets.values()).map(w => w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1));
+  const maxZ = Math.max(...allZIndexes, 1);
+  const minZ = Math.min(...allZIndexes, 0);
+  const currentZ = widget.style?.zIndex ?? (widget.type === 'rectangle' ? 0 : 1);
+
   // Simple humanizer for Cron expression
   const humanizeCron = (cron: string): string => {
     if (!cron.trim()) return 'Manual run only';
@@ -152,7 +157,9 @@ export const ConfigPanel: React.FC = () => {
     // Filter out empty rows
     const cleanedEnv = envVars.filter((v) => v.key.trim() !== '');
 
-    const stylePayload: any = {};
+    const stylePayload: any = {
+      ...widget.style,
+    };
     if (isLabel) {
       stylePayload.fontSize = Number(fontSize);
       stylePayload.color = color;
@@ -561,6 +568,37 @@ export const ConfigPanel: React.FC = () => {
               </div>
             </>
           )}
+
+          {/* Layer control row */}
+          <div className="form-group">
+            <label className="form-label">
+              Layer <span className="layer-badge">z{currentZ}</span>
+            </label>
+            <div className="layer-controls">
+              <button
+                type="button"
+                className="layer-btn"
+                onClick={() => send({
+                  type: 'widget:update',
+                  id: widget._id,
+                  payload: { style: { ...widget.style, zIndex: maxZ + 1 } }
+                })}
+              >
+                ↑ Bring to Front
+              </button>
+              <button
+                type="button"
+                className="layer-btn"
+                onClick={() => send({
+                  type: 'widget:update',
+                  id: widget._id,
+                  payload: { style: { ...widget.style, zIndex: Math.max(0, minZ - 1) } }
+                })}
+              >
+                ↓ Send to Back
+              </button>
+            </div>
+          </div>
 
           {/* Form actions */}
           <div className="config-actions">
