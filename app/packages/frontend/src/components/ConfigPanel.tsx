@@ -78,14 +78,14 @@ export const ConfigPanel: React.FC = () => {
         
         // Sync style fields
         const style = widget.style || {};
-        setFontSize(style.fontSize ?? 16);
+        setFontSize(style.fontSize ?? (widget.type === 'markdown' ? 14 : 16));
         setColor(style.color ?? '#111827');
-        setBackgroundColor(style.backgroundColor ?? '#EEF2F6');
-        setBorderColor(style.borderColor ?? '#D1D5DB');
+        setBackgroundColor(style.backgroundColor ?? (widget.type === 'markdown' ? '#FFFFFF' : '#EEF2F6'));
+        setBorderColor(style.borderColor ?? (widget.type === 'markdown' ? '#E5E7EB' : '#D1D5DB'));
         setBorderStyle(style.borderStyle ?? 'solid');
         setBorderRadius(style.borderRadius ?? 8);
-        setWidth(style.width ?? 200);
-        setHeight(style.height ?? 150);
+        setWidth(style.width ?? (widget.type === 'markdown' ? 300 : widget.type === 'rectangle' ? 200 : 150));
+        setHeight(style.height ?? (widget.type === 'markdown' ? 200 : widget.type === 'rectangle' ? 150 : 60));
 
         loadedWidgetIdRef.current = widget._id;
       }
@@ -102,6 +102,64 @@ export const ConfigPanel: React.FC = () => {
     }
   }, [widget?.style?.width, widget?.style?.height]);
 
+  // Ref for debouncing websocket sends
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Flush any pending updates when widget selection changes
+  useEffect(() => {
+    if (debounceTimerRef.current && loadedWidgetIdRef.current) {
+      const prevWidgetId = loadedWidgetIdRef.current;
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+
+      // Find the widget from the store to get the latest style payload
+      const prevWidget = widgets.get(prevWidgetId);
+      if (prevWidget) {
+        const stylePayload: any = { ...prevWidget.style };
+        if (prevWidget.type === 'label') {
+          stylePayload.fontSize = Number(fontSize);
+          stylePayload.color = color;
+          stylePayload.width = Number(width);
+          stylePayload.height = Number(height);
+        } else if (prevWidget.type === 'rectangle') {
+          stylePayload.width = Number(width);
+          stylePayload.height = Number(height);
+          stylePayload.backgroundColor = backgroundColor;
+          stylePayload.borderColor = borderColor;
+          stylePayload.borderStyle = borderStyle;
+          stylePayload.borderRadius = Number(borderRadius);
+        } else if (prevWidget.type === 'markdown') {
+          stylePayload.fontSize = Number(fontSize);
+          stylePayload.color = color;
+          stylePayload.width = Number(width);
+          stylePayload.height = Number(height);
+          stylePayload.backgroundColor = backgroundColor;
+          stylePayload.borderColor = borderColor;
+          stylePayload.borderStyle = borderStyle;
+          stylePayload.borderRadius = Number(borderRadius);
+        }
+
+        send({
+          type: 'widget:update',
+          id: prevWidgetId,
+          payload: {
+            label,
+            style: stylePayload,
+          },
+        });
+      }
+    }
+  }, [selectedWidgetId]);
+
   if (!widget) {
     return (
       <div className="config-panel">
@@ -113,6 +171,113 @@ export const ConfigPanel: React.FC = () => {
   const isWidget = !widget.type || widget.type === 'widget';
   const isLabel = widget.type === 'label';
   const isRectangle = widget.type === 'rectangle';
+  const isMarkdown = widget.type === 'markdown';
+
+  // General reactive update helper
+  const triggerReactiveUpdate = (updatedFields: Partial<Widget>, updatedStyle?: any) => {
+    if (!widget) return;
+
+    // 1. Instantly update the local Zustand store so changes render in real-time
+    useWidgetStore.setState((state) => {
+      const next = new Map(state.widgets);
+      const w = next.get(widget._id);
+      if (w) {
+        const nextStyle = updatedStyle !== undefined ? { ...w.style, ...updatedStyle } : w.style;
+        next.set(widget._id, {
+          ...w,
+          ...updatedFields,
+          style: nextStyle,
+        });
+      }
+      return { widgets: next };
+    });
+
+    // 2. Debounce the WebSocket message to the server (250ms)
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      const payload: any = {
+        ...updatedFields,
+      };
+      if (updatedStyle !== undefined) {
+        payload.style = {
+          ...(widget.style || {}),
+          ...updatedStyle,
+        };
+      }
+      send({
+        type: 'widget:update',
+        id: widget._id,
+        payload,
+      });
+      debounceTimerRef.current = null;
+    }, 250);
+  };
+
+  // Specific event handlers that trigger reactive updates
+  const handleLabelChange = (newVal: string) => {
+    setLabel(newVal);
+    if (isLabel || isRectangle || isMarkdown) {
+      triggerReactiveUpdate({ label: newVal });
+    }
+  };
+
+  const handleFontSizeChange = (newVal: number) => {
+    setFontSize(newVal);
+    if (isLabel || isMarkdown) {
+      triggerReactiveUpdate({}, { fontSize: newVal });
+    }
+  };
+
+  const handleColorChange = (newVal: string) => {
+    setColor(newVal);
+    if (isLabel || isMarkdown) {
+      triggerReactiveUpdate({}, { color: newVal });
+    }
+  };
+
+  const handleBackgroundColorChange = (newVal: string) => {
+    setBackgroundColor(newVal);
+    if (isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { backgroundColor: newVal });
+    }
+  };
+
+  const handleBorderColorChange = (newVal: string) => {
+    setBorderColor(newVal);
+    if (isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { borderColor: newVal });
+    }
+  };
+
+  const handleBorderStyleChange = (newVal: any) => {
+    setBorderStyle(newVal);
+    if (isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { borderStyle: newVal });
+    }
+  };
+
+  const handleBorderRadiusChange = (newVal: number) => {
+    setBorderRadius(newVal);
+    if (isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { borderRadius: newVal });
+    }
+  };
+
+  const handleWidthChange = (newVal: number) => {
+    setWidth(newVal);
+    if (isLabel || isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { width: newVal });
+    }
+  };
+
+  const handleHeightChange = (newVal: number) => {
+    setHeight(newVal);
+    if (isLabel || isRectangle || isMarkdown) {
+      triggerReactiveUpdate({}, { height: newVal });
+    }
+  };
 
   const allZIndexes = Array.from(widgets.values()).map(w => w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1));
   const maxZ = Math.max(...allZIndexes, 1);
@@ -164,6 +329,13 @@ export const ConfigPanel: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Cancel any pending debounced update
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
     // Filter out empty rows
     const cleanedEnv = envVars.filter((v) => v.key.trim() !== '');
 
@@ -176,6 +348,15 @@ export const ConfigPanel: React.FC = () => {
       stylePayload.width = Number(width);
       stylePayload.height = Number(height);
     } else if (isRectangle) {
+      stylePayload.width = Number(width);
+      stylePayload.height = Number(height);
+      stylePayload.backgroundColor = backgroundColor;
+      stylePayload.borderColor = borderColor;
+      stylePayload.borderStyle = borderStyle;
+      stylePayload.borderRadius = Number(borderRadius);
+    } else if (isMarkdown) {
+      stylePayload.fontSize = Number(fontSize);
+      stylePayload.color = color;
       stylePayload.width = Number(width);
       stylePayload.height = Number(height);
       stylePayload.backgroundColor = backgroundColor;
@@ -222,7 +403,7 @@ export const ConfigPanel: React.FC = () => {
   };
 
   const handleDeleteWidget = () => {
-    const itemType = isLabel ? 'label' : isRectangle ? 'rectangle' : 'widget';
+    const itemType = isLabel ? 'label' : isRectangle ? 'rectangle' : isMarkdown ? 'markdown' : 'widget';
     if (confirm(`Are you sure you want to delete this ${itemType}?`)) {
       send({ type: 'widget:delete', id: widget._id });
       selectWidget(null);
@@ -233,7 +414,7 @@ export const ConfigPanel: React.FC = () => {
     <div className={`config-panel ${selectedWidgetId ? 'open' : ''}`}>
       <div className="config-header">
         <h3 className="config-title">
-          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : 'Widget'}
+          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown Note' : 'Widget'}
         </h3>
         <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
           &times;
@@ -245,15 +426,15 @@ export const ConfigPanel: React.FC = () => {
           {/* Label / Text field */}
           <div className="form-group">
             <label className="form-label">
-              {isLabel ? 'Text Content' : isRectangle ? 'Title (Optional)' : 'Label'}
+              {isLabel ? 'Text Content' : isRectangle ? 'Title (Optional)' : isMarkdown ? 'Markdown Content' : 'Label'}
             </label>
-            {isLabel ? (
+            {isLabel || isMarkdown ? (
               <textarea
                 className="form-input"
                 value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="Type label text here..."
-                rows={3}
+                onChange={(e) => handleLabelChange(e.target.value)}
+                placeholder={isMarkdown ? "Type markdown here..." : "Type label text here..."}
+                rows={isMarkdown ? 14 : 3}
                 required
               />
             ) : (
@@ -261,7 +442,7 @@ export const ConfigPanel: React.FC = () => {
                 type="text"
                 className="form-input"
                 value={label}
-                onChange={(e) => setLabel(e.target.value)}
+                onChange={(e) => handleLabelChange(e.target.value)}
                 placeholder={isRectangle ? 'e.g. Database Group' : 'e.g. Ping Web Gateway'}
                 required={!isRectangle}
               />
@@ -397,9 +578,8 @@ export const ConfigPanel: React.FC = () => {
               </div>
             </>
           )}
-
-          {/* Label Specific Fields */}
-          {isLabel && (
+          {/* Text Styling (for Label & Markdown) */}
+          {(isLabel || isMarkdown) && (
             <>
               {/* Font Size Selector */}
               <div className="form-group">
@@ -407,7 +587,7 @@ export const ConfigPanel: React.FC = () => {
                 <select
                   className="form-input"
                   value={fontSize}
-                  onChange={(e) => setFontSize(Number(e.target.value))}
+                  onChange={(e) => handleFontSizeChange(Number(e.target.value))}
                 >
                   <option value={12}>12 (Small)</option>
                   <option value={14}>14 (Regular)</option>
@@ -428,13 +608,13 @@ export const ConfigPanel: React.FC = () => {
                     className="form-input"
                     style={{ width: '50px', height: '36px', padding: '2px', cursor: 'pointer' }}
                     value={color}
-                    onChange={(e) => setColor(e.target.value)}
+                    onChange={(e) => handleColorChange(e.target.value)}
                   />
                   <input
                     type="text"
                     className="form-input"
                     value={color}
-                    onChange={(e) => setColor(e.target.value)}
+                    onChange={(e) => handleColorChange(e.target.value)}
                     placeholder="#000000"
                     style={{ flexGrow: 1 }}
                   />
@@ -445,7 +625,7 @@ export const ConfigPanel: React.FC = () => {
                     <button
                       key={preset}
                       type="button"
-                      onClick={() => setColor(preset)}
+                      onClick={() => handleColorChange(preset)}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -462,8 +642,8 @@ export const ConfigPanel: React.FC = () => {
             </>
           )}
 
-          {/* Label & Rectangle Dimensions */}
-          {(isLabel || isRectangle) && (
+          {/* Dimensions (Label, Rectangle & Markdown) */}
+          {(isLabel || isRectangle || isMarkdown) && (
             <div style={{ display: 'flex', gap: '12px' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label className="form-label">Width (px)</label>
@@ -471,7 +651,7 @@ export const ConfigPanel: React.FC = () => {
                   type="number"
                   className="form-input"
                   value={width}
-                  onChange={(e) => setWidth(Number(e.target.value))}
+                  onChange={(e) => handleWidthChange(Number(e.target.value))}
                   min={40}
                 />
               </div>
@@ -481,17 +661,16 @@ export const ConfigPanel: React.FC = () => {
                   type="number"
                   className="form-input"
                   value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
+                  onChange={(e) => handleHeightChange(Number(e.target.value))}
                   min={30}
                 />
               </div>
             </div>
           )}
 
-          {/* Rectangle Specific Fields */}
-          {isRectangle && (
+          {/* Container Styling (Rectangle & Markdown) */}
+          {(isRectangle || isMarkdown) && (
             <>
-
               {/* Background Color Picker / Presets */}
               <div className="form-group">
                 <label className="form-label">Background Color</label>
@@ -501,13 +680,13 @@ export const ConfigPanel: React.FC = () => {
                     className="form-input"
                     style={{ width: '50px', height: '36px', padding: '2px', cursor: 'pointer' }}
                     value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    onChange={(e) => handleBackgroundColorChange(e.target.value)}
                   />
                   <input
                     type="text"
                     className="form-input"
                     value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    onChange={(e) => handleBackgroundColorChange(e.target.value)}
                     placeholder="#FFFFFF"
                     style={{ flexGrow: 1 }}
                   />
@@ -518,7 +697,7 @@ export const ConfigPanel: React.FC = () => {
                     <button
                       key={preset}
                       type="button"
-                      onClick={() => setBackgroundColor(preset)}
+                      onClick={() => handleBackgroundColorChange(preset)}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -544,13 +723,13 @@ export const ConfigPanel: React.FC = () => {
                     className="form-input"
                     style={{ width: '50px', height: '36px', padding: '2px', cursor: 'pointer' }}
                     value={borderColor}
-                    onChange={(e) => setBorderColor(e.target.value)}
+                    onChange={(e) => handleBorderColorChange(e.target.value)}
                   />
                   <input
                     type="text"
                     className="form-input"
                     value={borderColor}
-                    onChange={(e) => setBorderColor(e.target.value)}
+                    onChange={(e) => handleBorderColorChange(e.target.value)}
                     placeholder="#000000"
                     style={{ flexGrow: 1 }}
                   />
@@ -561,7 +740,7 @@ export const ConfigPanel: React.FC = () => {
                     <button
                       key={preset}
                       type="button"
-                      onClick={() => setBorderColor(preset)}
+                      onClick={() => handleBorderColorChange(preset)}
                       style={{
                         width: '24px',
                         height: '24px',
@@ -582,7 +761,7 @@ export const ConfigPanel: React.FC = () => {
                 <select
                   className="form-input"
                   value={borderStyle}
-                  onChange={(e) => setBorderStyle(e.target.value as any)}
+                  onChange={(e) => handleBorderStyleChange(e.target.value as any)}
                 >
                   <option value="solid">Solid</option>
                   <option value="dashed">Dashed</option>
@@ -601,7 +780,7 @@ export const ConfigPanel: React.FC = () => {
                   className="form-input"
                   style={{ padding: '4px 0' }}
                   value={borderRadius}
-                  onChange={(e) => setBorderRadius(Number(e.target.value))}
+                  onChange={(e) => handleBorderRadiusChange(Number(e.target.value))}
                 />
               </div>
             </>
@@ -652,7 +831,7 @@ export const ConfigPanel: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
             <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : 'Widget'}
+              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown Note' : 'Widget'}
             </button>
           </div>
         </form>

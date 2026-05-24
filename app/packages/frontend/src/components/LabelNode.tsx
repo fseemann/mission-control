@@ -12,7 +12,7 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
     selectWidget(id);
   };
 
-  const onResizeEnd = (event: any, params: { width: number; height: number }) => {
+  const onResizeEnd = (_event: any, params: { width: number; height: number }) => {
     send({
       type: 'widget:update',
       id,

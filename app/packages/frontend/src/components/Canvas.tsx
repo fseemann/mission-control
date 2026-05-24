@@ -19,11 +19,13 @@ import { useWidgetStore } from '../store/useWidgetStore';
 import WidgetNode from './WidgetNode';
 import LabelNode from './LabelNode';
 import RectangleNode from './RectangleNode';
+import MarkdownNode from './MarkdownNode';
 
 const nodeTypes = {
   widgetNode: WidgetNode,
   labelNode: LabelNode,
   rectangleNode: RectangleNode,
+  markdownNode: MarkdownNode,
 };
 
 const defaultEdgeOptions = {
@@ -76,7 +78,7 @@ const Canvas: React.FC = () => {
     setNodes(
       Array.from(widgets.values()).map((w) => {
         const isSelected = selectedWidgetId === w._id;
-        const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : 'widgetNode';
+        const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : w.type === 'markdown' ? 'markdownNode' : 'widgetNode';
         return {
           id: w._id,
           type,
@@ -84,9 +86,9 @@ const Canvas: React.FC = () => {
           data: w,
           selected: isSelected,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
-          style: (w.type === 'rectangle' || w.type === 'label') ? {
-            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : 150),
-            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : 60),
+          style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown') ? {
+            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : 150),
+            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : 60),
           } : undefined,
         } as FlowNode;
       })
@@ -167,6 +169,28 @@ const Canvas: React.FC = () => {
               borderColor: '#D1D5DB',
               borderStyle: 'solid',
               borderRadius: 8,
+            },
+          },
+        });
+      } else if (type === 'markdownNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'markdown',
+            label: '# Markdown Note\n\nDouble-click to edit! Supports:\n- **Bold** & *italics*\n- Lists\n- `Code inline` and blocks\n\n```js\n// Example code\nconsole.log("Hello!");\n```',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              width: 300,
+              height: 200,
+              backgroundColor: '#FFFFFF',
+              borderColor: '#E5E7EB',
+              borderStyle: 'solid',
+              borderRadius: 8,
+              fontSize: 14,
+              color: '#111827',
             },
           },
         });

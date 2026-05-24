@@ -31,7 +31,7 @@ export interface Edge {
   label?: string;
 }
 
-export type ElementType = 'widget' | 'label' | 'rectangle';
+export type ElementType = 'widget' | 'label' | 'rectangle' | 'markdown';
 
 export interface ElementStyle {
   width?: number;

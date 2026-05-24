@@ -75,6 +75,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
                 </div>
               </div>
             </div>
+
+            <div
+              className="draggable-widget"
+              draggable
+              onDragStart={(e) => onDragStart(e, 'markdownNode')}
+              title="Drag onto canvas to create a markdown text note"
+            >
+              <span className="widget-icon">📄</span>
+              <div>
+                <strong>Markdown Note</strong>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Rich-text canvas card
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="sidebar-section-title" style={{ marginTop: '28px' }}>Help & Docs</div>

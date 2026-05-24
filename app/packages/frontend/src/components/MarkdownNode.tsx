@@ -2,8 +2,10 @@ import React from 'react';
 import { NodeResizer, NodeProps } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
-export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
+export const MarkdownNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
   const send = useWidgetStore((state) => state.send);
 
@@ -27,38 +29,55 @@ export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
   };
 
   const style = element.style || {};
-  const backgroundColor = style.backgroundColor || '#EEF2F6';
-  const borderColor = style.borderColor || '#D1D5DB';
+  const fontSize = style.fontSize !== undefined ? `${style.fontSize}px` : '14px';
+  const color = style.color || 'var(--text-primary)';
+  const backgroundColor = style.backgroundColor || '#FFFFFF';
+  const borderColor = style.borderColor || '#E5E7EB';
   const borderStyle = style.borderStyle || 'solid';
   const borderRadius = style.borderRadius !== undefined ? `${style.borderRadius}px` : '8px';
 
+  // Compile Markdown to sanitized HTML safely
+  const rawHtml = React.useMemo(() => {
+    const raw = element.label || '';
+    try {
+      // Synchronous parse by default in marked 4+ / 18+
+      return DOMPurify.sanitize(marked.parse(raw, { async: false }) as string);
+    } catch (e) {
+      console.error('Failed to parse Markdown:', e);
+      return raw;
+    }
+  }, [element.label]);
+
   return (
     <div
-      className={`rectangle-node ${selected ? 'selected' : ''}`}
+      className={`markdown-node-card ${selected ? 'selected' : ''}`}
       style={{
         width: '100%',
         height: '100%',
+        fontSize,
+        color,
         backgroundColor,
         border: borderStyle === 'none' ? 'none' : `2px ${borderStyle} ${borderColor}`,
         borderRadius,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
         position: 'relative',
       }}
       onDoubleClick={handleDoubleClick}
     >
       <NodeResizer
         color="var(--accent)"
-        minWidth={50}
-        minHeight={50}
+        minWidth={100}
+        minHeight={60}
         isVisible={selected}
         onResizeEnd={onResizeEnd}
       />
-      {element.label && (
-        <div className="rectangle-node-label">
-          {element.label}
-        </div>
-      )}
+      <div
+        className="markdown-node-content"
+        dangerouslySetInnerHTML={{ __html: rawHtml }}
+      />
     </div>
   );
 };
 
-export default RectangleNode;
+export default MarkdownNode;
