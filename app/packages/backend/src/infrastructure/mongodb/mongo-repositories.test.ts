@@ -37,6 +37,11 @@ describe('Mongo Repositories', () => {
         const doc = data.get(key);
         if (!doc) return null;
         const updated = { ...doc, ...update.$set };
+        if (update.$unset) {
+          for (const k of Object.keys(update.$unset)) {
+            delete updated[k];
+          }
+        }
         data.set(key, updated);
         return updated;
       },
@@ -107,6 +112,14 @@ describe('Mongo Repositories', () => {
       // Verify DB has new encrypted value
       const rawDoc2 = (mockCol as any).data.get(created._id);
       expect(cryptoMod.decrypt(rawDoc2.envVars[0].value)).toBe('new-token');
+
+      // 3.5. Update and unset cronExpression
+      const updatedCron = await repo.update(created._id, {
+        cronExpression: ''
+      });
+      expect(updatedCron.cronExpression).toBeUndefined();
+      const rawDocCron = (mockCol as any).data.get(created._id);
+      expect(rawDocCron.cronExpression).toBeUndefined();
 
       // 4. Save result
       await repo.saveResult(created._id, { status: 'ok', durationMs: 120, ranAt: new Date().toISOString() }, 'ok');

@@ -131,7 +131,7 @@ export const ConfigPanel: React.FC = () => {
       id: widget._id,
       payload: {
         label,
-        cronExpression: cronExpression.trim() ? cronExpression : undefined,
+        cronExpression: cronExpression.trim() ? cronExpression : '',
         timeoutMs: Number(timeoutMs),
         code,
         envVars: cleanedEnv,

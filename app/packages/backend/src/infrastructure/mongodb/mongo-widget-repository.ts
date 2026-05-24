@@ -64,7 +64,6 @@ export class MongoWidgetRepository implements IWidgetRepository {
     const fields: Array<keyof Widget> = [
       'label',
       'code',
-      'cronExpression',
       'timeoutMs',
       'position',
       'status',
@@ -77,11 +76,25 @@ export class MongoWidgetRepository implements IWidgetRepository {
       }
     }
 
+    const unsetDoc: any = {};
+    if (patch.cronExpression !== undefined) {
+      if (patch.cronExpression && patch.cronExpression.trim() !== '') {
+        updateDoc.cronExpression = patch.cronExpression;
+      } else {
+        unsetDoc.cronExpression = '';
+      }
+    }
+
     updateDoc.updatedAt = new Date().toISOString();
+
+    const updateQuery: any = { $set: updateDoc };
+    if (Object.keys(unsetDoc).length > 0) {
+      updateQuery.$unset = unsetDoc;
+    }
 
     const result = await this.col.findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: updateDoc },
+      updateQuery,
       { returnDocument: 'after' }
     );
 
