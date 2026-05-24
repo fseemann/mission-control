@@ -1,5 +1,5 @@
 import React from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { NodeProps } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 
@@ -64,14 +64,6 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
       style={{ borderLeft: `4px solid ${statusColor}` }}
       onDoubleClick={handleDoubleClick}
     >
-      {/* React Flow inputs handle on Left */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="input"
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-      />
-
       <div className="widget-node-header">
         <span
           className={`status-dot ${status === 'running' ? 'running' : ''}`}
@@ -89,14 +81,6 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
           <span title={`Schedule: ${widget.cronExpression}`}>⏱️</span>
         )}
       </div>
-
-      {/* React Flow outputs handle on Right */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="output"
-        style={{ top: '50%', transform: 'translateY(-50%)' }}
-      />
     </div>
   );
 };

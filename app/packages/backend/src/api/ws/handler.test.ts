@@ -313,6 +313,49 @@ describe('WsHandler', () => {
     expect(JSON.parse((ws as any).sentMessages[2]).id).toBe('edge-ab');
   });
 
+  test('should reject edge creation if source or target is a status widget', async () => {
+    const widgetRepo = new MockWidgetRepository();
+    const edgeRepo = new MockEdgeRepository();
+    const mockRunner = {} as unknown as RunnerService;
+    const mockScheduler = {} as unknown as SchedulerService;
+
+    const w1 = await widgetRepo.create({
+      label: 'Status Widget',
+      type: 'widget',
+      code: '',
+      envVars: [],
+      timeoutMs: 1000,
+      position: { x: 0, y: 0 }
+    });
+
+    const w2 = await widgetRepo.create({
+      label: 'Label Widget',
+      type: 'label',
+      code: '',
+      envVars: [],
+      timeoutMs: 1000,
+      position: { x: 100, y: 100 }
+    });
+
+    const handler = new WsHandler(widgetRepo, edgeRepo, mockRunner, mockScheduler);
+    const ws = new MockWebSocket() as unknown as ServerWebSocket<any>;
+
+    await handler.handleMessage(ws, JSON.stringify({
+      type: 'edge:create',
+      payload: {
+        id: 'edge-invalid',
+        source: w1._id,
+        target: w2._id
+      }
+    } satisfies ClientMessage));
+
+    expect((ws as any).sentMessages.length).toBe(1);
+    const errorMsg = JSON.parse((ws as any).sentMessages[0]);
+    expect(errorMsg.type).toBe('error');
+    expect(errorMsg.message).toBe('Status widgets cannot have edge connections');
+    expect(edgeRepo.edges.length).toBe(0);
+  });
+
   test('should handle errors gracefully by sending error message to originating socket', async () => {
     const widgetRepo = new MockWidgetRepository();
     const edgeRepo = new MockEdgeRepository();

@@ -230,6 +230,18 @@ const Canvas: React.FC = () => {
     (connection: Connection) => {
       if (!connection.source || !connection.target) return;
 
+      const sourceWidget = widgets.get(connection.source);
+      const targetWidget = widgets.get(connection.target);
+
+      // 'widget' type corresponds to Status Widget (default type is also 'widget' if not specified)
+      if (
+        !sourceWidget || sourceWidget.type === 'widget' ||
+        !targetWidget || targetWidget.type === 'widget'
+      ) {
+        console.warn('Status widgets cannot have edge connections');
+        return;
+      }
+
       send({
         type: 'edge:create',
         payload: {
@@ -239,7 +251,7 @@ const Canvas: React.FC = () => {
         },
       });
     },
-    [send]
+    [widgets, send]
   );
 
   // Handle deleting edges

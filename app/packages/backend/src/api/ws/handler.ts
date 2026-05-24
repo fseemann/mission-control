@@ -89,6 +89,11 @@ export class WsHandler {
           break;
         }
         case 'edge:create': {
+          const sourceWidget = await this.widgetRepo.findById(msg.payload.source);
+          const targetWidget = await this.widgetRepo.findById(msg.payload.target);
+          if (sourceWidget?.type === 'widget' || targetWidget?.type === 'widget') {
+            throw new Error('Status widgets cannot have edge connections');
+          }
           const edge = await this.edgeRepo.create(msg.payload);
           this.broadcast({ type: 'edge:created', edge } satisfies ServerMessage);
           break;
