@@ -21,18 +21,20 @@ export class MongoWidgetRepository implements IWidgetRepository {
   }
 
   async create(data: NewWidget): Promise<Widget> {
-    const encryptedEnvVars = data.envVars.map(ev => ({
+    const encryptedEnvVars = (data.envVars || []).map(ev => ({
       key: ev.key,
       value: this.crypto.encrypt(ev.value)
     }));
 
     const doc = {
+      type: data.type || 'widget',
       label: data.label,
-      code: data.code,
+      code: data.code || '',
       envVars: encryptedEnvVars,
       cronExpression: data.cronExpression,
       timeoutMs: data.timeoutMs ?? 10_000,
       position: data.position,
+      style: data.style,
       status: 'idle' as const,
       updatedAt: new Date().toISOString()
     };
@@ -42,7 +44,7 @@ export class MongoWidgetRepository implements IWidgetRepository {
     return {
       _id: result.insertedId.toHexString(),
       ...doc,
-      envVars: data.envVars // Return decrypted (plaintext) envVars
+      envVars: data.envVars || [] // Return decrypted (plaintext) envVars
     };
   }
 
@@ -62,10 +64,12 @@ export class MongoWidgetRepository implements IWidgetRepository {
 
     // Copy other fields if defined
     const fields: Array<keyof Widget> = [
+      'type',
       'label',
       'code',
       'timeoutMs',
       'position',
+      'style',
       'status',
       'lastResult'
     ];
@@ -139,12 +143,14 @@ export class MongoWidgetRepository implements IWidgetRepository {
 
     return {
       _id: doc._id.toHexString(),
+      type: doc.type || 'widget',
       label: doc.label,
       code: doc.code,
       envVars: decryptedEnvVars,
       cronExpression: doc.cronExpression,
       timeoutMs: doc.timeoutMs,
       position: doc.position,
+      style: doc.style,
       status: doc.status,
       lastResult: doc.lastResult,
       updatedAt: doc.updatedAt

@@ -31,14 +31,29 @@ export interface Edge {
   label?: string;
 }
 
+export type ElementType = 'widget' | 'label' | 'rectangle';
+
+export interface ElementStyle {
+  width?: number;
+  height?: number;
+  color?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
+  borderRadius?: number;
+  fontSize?: number;
+}
+
 export interface Widget {
   _id: string;
+  type?: ElementType;
   label: string;
   code: string;              // raw TS source stored as string
   envVars: EnvVar[];         // plaintext keys; values are encrypted at rest
   cronExpression?: string;   // e.g. "*/5 * * * *" — omit for manual-run only
   timeoutMs: number;         // default 10 000, user-editable
   position: { x: number; y: number };
+  style?: ElementStyle;
   status: WidgetStatus;
   lastResult?: ExecutionResult;
   updatedAt: string;
@@ -63,8 +78,8 @@ export interface ExecutionResult {
 export type ClientMessage =
   // Widgets
   | { type: 'widget:list' }
-  | { type: 'widget:create'; payload: Pick<Widget, 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position'> & { cronExpression?: string } }
-  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position'>> }
+  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style'> & { cronExpression?: string } }
+  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style'>> }
   | { type: 'widget:delete'; id: string }
   | { type: 'widget:run';    id: string }
   // Edges

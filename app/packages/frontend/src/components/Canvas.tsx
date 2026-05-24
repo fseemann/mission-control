@@ -16,9 +16,13 @@ import 'reactflow/dist/style.css';
 
 import { useWidgetStore } from '../store/useWidgetStore';
 import WidgetNode from './WidgetNode';
+import LabelNode from './LabelNode';
+import RectangleNode from './RectangleNode';
 
 const nodeTypes = {
   widgetNode: WidgetNode,
+  labelNode: LabelNode,
+  rectangleNode: RectangleNode,
 };
 
 const defaultEdgeOptions = {
@@ -44,12 +48,17 @@ const Canvas: React.FC = () => {
   const flowNodes = useMemo(() => {
     return Array.from(widgets.values()).map((w) => {
       const isSelected = selectedWidgetId === w._id;
+      const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : 'widgetNode';
       return {
         id: w._id,
-        type: 'widgetNode',
+        type,
         position: w.position,
         data: w,
         selected: isSelected,
+        style: w.type === 'rectangle' ? {
+          width: w.style?.width ?? 200,
+          height: w.style?.height ?? 150,
+        } : undefined,
       } as FlowNode;
     });
   }, [widgets, selectedWidgetId]);
@@ -91,16 +100,55 @@ const Canvas: React.FC = () => {
         y: event.clientY - reactFlowBounds.top,
       });
 
-      send({
-        type: 'widget:create',
-        payload: {
-          label: 'Status Widget',
-          code: '', // Default script generated on server/save
-          envVars: [],
-          timeoutMs: 10000,
-          position,
-        },
-      });
+      if (type === 'labelNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'label',
+            label: 'Text Label',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              fontSize: 16,
+              color: '#111827',
+            },
+          },
+        });
+      } else if (type === 'rectangleNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'rectangle',
+            label: '',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              width: 200,
+              height: 150,
+              backgroundColor: '#EEF2F6',
+              borderColor: '#D1D5DB',
+              borderStyle: 'solid',
+              borderRadius: 8,
+            },
+          },
+        });
+      } else {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'widget',
+            label: 'Status Widget',
+            code: '', // Default script generated on server/save
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+          },
+        });
+      }
     },
     [project, send]
   );

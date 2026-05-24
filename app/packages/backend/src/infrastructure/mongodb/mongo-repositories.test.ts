@@ -132,6 +132,43 @@ describe('Mongo Repositories', () => {
       const foundAfterDelete = await repo.findById(created._id);
       expect(foundAfterDelete).toBeNull();
     });
+
+    test('should correctly support label and rectangle visual element types with styles', async () => {
+      const mockCol = createMockCollection<any>();
+      const repo = new MongoWidgetRepository(mockCol, cryptoMod);
+
+      const labelElement: NewWidget = {
+        type: 'label',
+        label: 'My Canvas Label',
+        code: '',
+        envVars: [],
+        position: { x: 50, y: 100 },
+        timeoutMs: 10000,
+        style: {
+          fontSize: 24,
+          color: '#ff0000'
+        }
+      };
+
+      // Create
+      const createdLabel = await repo.create(labelElement);
+      expect(createdLabel.type).toBe('label');
+      expect(createdLabel.style?.fontSize).toBe(24);
+      expect(createdLabel.style?.color).toBe('#ff0000');
+
+      // Find
+      const foundLabel = await repo.findById(createdLabel._id);
+      expect(foundLabel).not.toBeNull();
+      expect(foundLabel!.type).toBe('label');
+      expect(foundLabel!.style).toEqual({ fontSize: 24, color: '#ff0000' });
+
+      // Update
+      const updatedLabel = await repo.update(createdLabel._id, {
+        style: { fontSize: 32, color: '#00ff00' }
+      });
+      expect(updatedLabel.style?.fontSize).toBe(32);
+      expect(updatedLabel.style?.color).toBe('#00ff00');
+    });
   });
 
   describe('MongoEdgeRepository', () => {
