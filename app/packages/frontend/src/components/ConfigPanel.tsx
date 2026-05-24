@@ -1001,6 +1001,7 @@ export const ConfigPanel: React.FC = () => {
                 <>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span className={`result-pill ${widget.status}`}>
+                      <span className={`milestone-badge-indicator status-${widget.status}`} style={{ marginRight: '6px' }} />
                       {widget.status}
                     </span>
                     <span className="result-time">

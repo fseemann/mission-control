@@ -71,7 +71,7 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
       />
       <div className="widget-node-header">
         <span
-          className={`status-dot ${status === 'running' ? 'running' : ''}`}
+          className={`status-dot status-${status} ${status === 'running' ? 'running' : ''}`}
           style={{ backgroundColor: statusColor }}
           title={`Status: ${status}`}
         />

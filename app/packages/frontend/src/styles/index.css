@@ -255,20 +255,90 @@ body, html, #root {
 }
 
 .status-dot {
+  position: relative;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.status-dot.running {
-  animation: pulse 1.2s infinite ease-in-out;
+.milestone-badge-indicator {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: currentColor;
+  flex-shrink: 0;
 }
 
-@keyframes pulse {
-  0% { transform: scale(0.8); opacity: 0.5; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.8); opacity: 0.5; }
+/* Pulsating ripple/halo rings for warning/error/active statuses */
+.status-dot.status-running::after,
+.status-dot.status-degraded::after,
+.status-dot.status-fail::after,
+.status-dot.status-crash::after,
+.status-dot.status-timeout::after,
+.milestone-badge-indicator.status-degraded::after,
+.milestone-badge-indicator.status-fail::after,
+.milestone-badge-indicator.status-crash::after,
+.milestone-badge-indicator.status-timeout::after,
+.milestone-badge-indicator.status-running::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0px var(--pulse-color);
+  animation: ripple 1.6s infinite cubic-bezier(0.25, 0, 0, 1);
+  pointer-events: none;
+}
+
+/* Define status specific variables & pulse scales */
+.status-dot.status-running,
+.milestone-badge-indicator.status-running {
+  --pulse-color: rgba(99, 102, 241, 0.75);
+  animation: pulse-dot 1.6s infinite ease-in-out;
+}
+
+.status-dot.status-degraded,
+.milestone-badge-indicator.status-degraded {
+  --pulse-color: rgba(245, 158, 11, 0.75);
+  animation: pulse-dot 1.6s infinite ease-in-out;
+}
+
+.status-dot.status-fail,
+.status-dot.status-crash,
+.status-dot.status-timeout,
+.milestone-badge-indicator.status-fail,
+.milestone-badge-indicator.status-crash,
+.milestone-badge-indicator.status-timeout {
+  --pulse-color: rgba(239, 68, 68, 0.75);
+  animation: pulse-dot 1.2s infinite ease-in-out; /* slightly faster pulse for errors */
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0px var(--pulse-color);
+    opacity: 0.9;
+  }
+  100% {
+    box-shadow: 0 0 0 6px rgba(0, 0, 0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(0.9);
+  }
 }
 
 .widget-node-title {
@@ -1140,6 +1210,7 @@ body, html, #root {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   display: inline-flex;
   align-items: center;
+  gap: 5px;
 }
 
 .milestone-badge-active {

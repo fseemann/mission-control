@@ -84,17 +84,25 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
     if (!hasConnections) return null;
 
     let badgeClass = 'milestone-badge-active';
-    let badgeText = '● ACTIVE';
+    let badgeLabel = 'ACTIVE';
+    let statusDotClass = 'status-ok';
 
     if (healthStatus === 'failed') {
       badgeClass = 'milestone-badge-failed';
-      badgeText = '✕ FAILED';
+      badgeLabel = 'FAILED';
+      statusDotClass = 'status-fail';
     } else if (healthStatus === 'at-risk') {
       badgeClass = 'milestone-badge-at-risk';
-      badgeText = '⚠ AT RISK';
+      badgeLabel = 'AT RISK';
+      statusDotClass = 'status-degraded';
     }
 
-    return <span className={`milestone-health-badge ${badgeClass}`}>{badgeText}</span>;
+    return (
+      <span className={`milestone-health-badge ${badgeClass}`}>
+        <span className={`milestone-badge-indicator ${statusDotClass}`} />
+        <span>{badgeLabel}</span>
+      </span>
+    );
   };
 
   return (
