@@ -124,6 +124,7 @@ export async function run({ env }: { env: Record<string, string> }) {
 
 export const HelpPanel: React.FC = () => {
   const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
+  const helpTab = useWidgetStore((state) => state.helpTab);
   const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
   const [copiedType, setCopiedType] = useState<'fetch' | 'tls' | null>(null);
 
@@ -137,89 +138,173 @@ export const HelpPanel: React.FC = () => {
   return (
     <div className={`help-panel ${isHelpOpen ? 'open' : ''}`}>
       <div className="help-header">
-        <h3 className="help-title">🛰️ Scripting Guide & Examples</h3>
+        <h3 className="help-title">
+          {helpTab === 'scripting' ? '🛰️ Scripting Guide' : '🔗 Edge Connections'}
+        </h3>
         <button className="close-btn" onClick={() => setHelpOpen(false)} title="Close Panel">
           &times;
         </button>
       </div>
 
-      <div className="help-body">
-        <section className="help-section">
-          <h4>Overview</h4>
-          <p>
-            Status Widgets execute <strong>TypeScript (TS) / JavaScript (JS)</strong> code
-            in an isolated child process powered by <strong>Bun</strong>.
-          </p>
-          <p>
-            Your script must export an <code>async run</code> function that receives the
-            widget's environment variables and returns a structured result.
-          </p>
-        </section>
+      <div className="help-tabs">
+        <button
+          type="button"
+          className={`help-tab-btn ${helpTab === 'scripting' ? 'active' : ''}`}
+          onClick={() => setHelpOpen(true, 'scripting')}
+        >
+          🛰️ Scripting
+        </button>
+        <button
+          type="button"
+          className={`help-tab-btn ${helpTab === 'edges' ? 'active' : ''}`}
+          onClick={() => setHelpOpen(true, 'edges')}
+        >
+          🔗 Edges
+        </button>
+      </div>
 
-        <section className="help-section">
-          <h4>The Script Contract</h4>
-          <div className="contract-box">
-            <h5>Expected Entry Point</h5>
-            <pre className="help-code-snippet">
+      <div className="help-body">
+        {helpTab === 'scripting' ? (
+          <>
+            <section className="help-section">
+              <h4>Overview</h4>
+              <p>
+                Status Widgets execute <strong>TypeScript (TS) / JavaScript (JS)</strong> code
+                in an isolated child process powered by <strong>Bun</strong>.
+              </p>
+              <p>
+                Your script must export an <code>async run</code> function that receives the
+                widget's environment variables and returns a structured result.
+              </p>
+            </section>
+
+            <section className="help-section">
+              <h4>The Script Contract</h4>
+              <div className="contract-box">
+                <h5>Expected Entry Point</h5>
+                <pre className="help-code-snippet">
 {`export async function run({ env }: { env: Record<string, string> }) {
   // Your code here...
 }`}
-            </pre>
-            <h5>Expected Return Value</h5>
-            <pre className="help-code-snippet">
+                </pre>
+                <h5>Expected Return Value</h5>
+                <pre className="help-code-snippet">
 {`{
   status: 'ok' | 'degraded' | 'fail',
   message?: string, // A short description shown in status summary
   output?: any      // Any JSON-serializable data logged under Output
 }`}
-            </pre>
-            <h5>Accessing Environment Variables</h5>
-            <p>
-              Variables defined in the <strong>Environment Variables</strong> table are decryptable at execution-time
-              and made available inside the <code>env</code> object parameter (e.g. <code>env.TARGET_URL</code>).
-            </p>
-          </div>
-        </section>
+                </pre>
+                <h5>Accessing Environment Variables</h5>
+                <p>
+                  Variables defined in the <strong>Environment Variables</strong> table are decryptable at execution-time
+                  and made available inside the <code>env</code> object parameter (e.g. <code>env.TARGET_URL</code>).
+                </p>
+              </div>
+            </section>
 
-        <section className="help-section">
-          <div className="example-header">
-            <h4>Example 1: HTTP Status Checker</h4>
-            <button 
-              className={`copy-btn ${copiedType === 'fetch' ? 'copied' : ''}`}
-              onClick={() => handleCopy(FETCH_EXAMPLE_CODE, 'fetch')}
-            >
-              {copiedType === 'fetch' ? '✅ Copied!' : '📋 Copy Code'}
-            </button>
-          </div>
-          <p className="example-description">
-            Fetches a URL from environment variables (or falls back to a default) and updates the widget status based on the HTTP response code.
-          </p>
-          <div className="code-container">
-            <pre className="example-code-pre">
-              <code>{FETCH_EXAMPLE_CODE}</code>
-            </pre>
-          </div>
-        </section>
+            <section className="help-section">
+              <div className="example-header">
+                <h4>Example 1: HTTP Status Checker</h4>
+                <button 
+                  className={`copy-btn ${copiedType === 'fetch' ? 'copied' : ''}`}
+                  onClick={() => handleCopy(FETCH_EXAMPLE_CODE, 'fetch')}
+                >
+                  {copiedType === 'fetch' ? '✅ Copied!' : '📋 Copy Code'}
+                </button>
+              </div>
+              <p className="example-description">
+                Fetches a URL from environment variables (or falls back to a default) and updates the widget status based on the HTTP response code.
+              </p>
+              <div className="code-container">
+                <pre className="example-code-pre">
+                  <code>{FETCH_EXAMPLE_CODE}</code>
+                </pre>
+              </div>
+            </section>
 
-        <section className="help-section">
-          <div className="example-header">
-            <h4>Example 2: TLS Certificate Verifier</h4>
-            <button 
-              className={`copy-btn ${copiedType === 'tls' ? 'copied' : ''}`}
-              onClick={() => handleCopy(TLS_EXAMPLE_CODE, 'tls')}
-            >
-              {copiedType === 'tls' ? '✅ Copied!' : '📋 Copy Code'}
-            </button>
-          </div>
-          <p className="example-description">
-            Connects to a server using the built-in Node/Bun <code>node:tls</code> library to verify if the certificate is authorized and alerts if it is expiring within 30 days.
-          </p>
-          <div className="code-container">
-            <pre className="example-code-pre">
-              <code>{TLS_EXAMPLE_CODE}</code>
-            </pre>
-          </div>
-        </section>
+            <section className="help-section">
+              <div className="example-header">
+                <h4>Example 2: TLS Certificate Verifier</h4>
+                <button 
+                  className={`copy-btn ${copiedType === 'tls' ? 'copied' : ''}`}
+                  onClick={() => handleCopy(TLS_EXAMPLE_CODE, 'tls')}
+                >
+                  {copiedType === 'tls' ? '✅ Copied!' : '📋 Copy Code'}
+                </button>
+              </div>
+              <p className="example-description">
+                Connects to a server using the built-in Node/Bun <code>node:tls</code> library to verify if the certificate is authorized and alerts if it is expiring within 30 days.
+              </p>
+              <div className="code-container">
+                <pre className="example-code-pre">
+                  <code>{TLS_EXAMPLE_CODE}</code>
+                </pre>
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="help-section">
+              <h4>Overview</h4>
+              <p>
+                Edges on the canvas define data dependency and health aggregation paths. They allow <strong>Status Widgets</strong> to feed their real-time execution health state directly into <strong>Goal Milestones</strong>.
+              </p>
+            </section>
+
+            <section className="help-section">
+              <h4>How to Attach Edges</h4>
+              <div className="help-steps">
+                <div className="help-step-item">
+                  <div className="help-step-number">1</div>
+                  <div className="help-step-content">
+                    Locate the circular <strong>connection handle</strong> on the <strong>right side</strong> of any Status Widget.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-number">2</div>
+                  <div className="help-step-content">
+                    Click and hold the handle, then <strong>drag a connection line</strong> across the canvas toward your target Milestone node.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-number">3</div>
+                  <div className="help-step-content">
+                    Release the mouse button over the incoming <strong>connection handle</strong> on the <strong>left side</strong> of the Milestone node.
+                  </div>
+                </div>
+              </div>
+              
+              <div className="rule-alert" style={{ marginTop: '16px' }}>
+                <span className="rule-alert-icon">ℹ️</span>
+                <div>
+                  <strong>Connectivity Rule:</strong> Status Widgets can only be connected to Milestones. Connections between status widgets, labels, layout rectangles, or markdown cards are blocked.
+                </div>
+              </div>
+            </section>
+
+            <section className="help-section">
+              <h4>How to Delete Edges</h4>
+              <div className="help-steps">
+                <div className="help-step-item">
+                  <div className="help-step-number">1</div>
+                  <div className="help-step-content">
+                    Click on the <strong>connection line (edge)</strong> you want to delete. The line will highlight to indicate that it is selected.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-number">2</div>
+                  <div className="help-step-content">
+                    Press the <span className="keyboard-key">Backspace</span> or <span className="keyboard-key">Delete</span> key on your keyboard.
+                  </div>
+                </div>
+              </div>
+              <p style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                The connection will be removed immediately, and the server will re-evaluate the target Milestone's overall health status based on its remaining active connections.
+              </p>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );

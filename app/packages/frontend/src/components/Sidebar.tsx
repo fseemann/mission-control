@@ -8,6 +8,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
+  const helpTab = useWidgetStore((state) => state.helpTab);
   const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
@@ -108,15 +109,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           </div>
 
           <div className="sidebar-section-title" style={{ marginTop: '28px' }}>Help & Docs</div>
-          <button
-            type="button"
-            className="sidebar-help-btn"
-            onClick={() => setHelpOpen(!isHelpOpen)}
-            title="Toggle status widget scripting guide and code examples"
-          >
-            <span>❓</span>
-            <span>Scripting Guide</span>
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+            <button
+              type="button"
+              className="sidebar-help-btn"
+              onClick={() => {
+                if (isHelpOpen && helpTab === 'scripting') {
+                  setHelpOpen(false);
+                } else {
+                  setHelpOpen(true, 'scripting');
+                }
+              }}
+              title="Toggle status widget scripting guide and code examples"
+              style={{ marginTop: 0 }}
+            >
+              <span>🛰️</span>
+              <span>Scripting Guide</span>
+            </button>
+            <button
+              type="button"
+              className="sidebar-help-btn"
+              onClick={() => {
+                if (isHelpOpen && helpTab === 'edges') {
+                  setHelpOpen(false);
+                } else {
+                  setHelpOpen(true, 'edges');
+                }
+              }}
+              title="Toggle edge connection and deletion guide"
+              style={{ marginTop: 0 }}
+            >
+              <span>🔗</span>
+              <span>Edge Connections</span>
+            </button>
+          </div>
         </div>
       </div>
       

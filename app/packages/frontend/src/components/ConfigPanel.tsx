@@ -42,6 +42,7 @@ export const ConfigPanel: React.FC = () => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
   const send = useWidgetStore((state) => state.send);
   const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
+  const helpTab = useWidgetStore((state) => state.helpTab);
   const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
 
   const widget = selectedWidgetId ? widgets.get(selectedWidgetId) : null;
@@ -707,7 +708,13 @@ export const ConfigPanel: React.FC = () => {
                       gap: '4px',
                       textDecoration: 'underline'
                     }}
-                    onClick={() => setHelpOpen(!isHelpOpen)}
+                    onClick={() => {
+                      if (isHelpOpen && helpTab === 'scripting') {
+                        setHelpOpen(false);
+                      } else {
+                        setHelpOpen(true, 'scripting');
+                      }
+                    }}
                     title="Toggle scripting guide and examples"
                   >
                     <span>❓</span>

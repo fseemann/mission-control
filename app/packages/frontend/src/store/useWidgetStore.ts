@@ -7,12 +7,13 @@ interface WidgetStore {
   selectedWidgetId: string | null;
   isConnected: boolean;
   isHelpOpen: boolean;
+  helpTab: 'scripting' | 'edges';
 
   // Actions
   connectWebSocket: () => void;
   send: (msg: ClientMessage) => void;
   selectWidget: (id: string | null) => void;
-  setHelpOpen: (open: boolean) => void;
+  setHelpOpen: (open: boolean, tab?: 'scripting' | 'edges') => void;
 }
 
 let socket: WebSocket | null = null;
@@ -148,6 +149,7 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
     selectedWidgetId: null,
     isConnected: false,
     isHelpOpen: false,
+    helpTab: 'scripting',
 
     connectWebSocket: () => {
       connect();
@@ -165,8 +167,11 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
       set({ selectedWidgetId: id });
     },
 
-    setHelpOpen: (open: boolean) => {
-      set({ isHelpOpen: open });
+    setHelpOpen: (open: boolean, tab?: 'scripting' | 'edges') => {
+      set((state) => ({
+        isHelpOpen: open,
+        helpTab: tab || (open ? 'scripting' : state.helpTab)
+      }));
     },
   };
 });
