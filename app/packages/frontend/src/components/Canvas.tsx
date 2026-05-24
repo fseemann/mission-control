@@ -256,6 +256,7 @@ const Canvas: React.FC = () => {
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
         onPaneClick={onPaneClick}
+        elevateNodesOnSelect={false}
         fitView
       >
         <Background variant={BackgroundVariant.Dots} color="#D1D5DB" gap={16} size={1} />
