@@ -30,12 +30,24 @@ const edgeRepo = new MongoEdgeRepository(
 // 2.5. Clean up any invalid edges connected to status widgets (type 'widget')
 try {
   const widgets = await widgetRepo.findAll();
-  const statusWidgetIds = new Set(
-    widgets.filter(w => !w.type || w.type === 'widget').map(w => w._id)
-  );
+  const widgetMap = new Map(widgets.map(w => [w._id, w]));
   const allEdges = await edgeRepo.findAll();
+
   for (const edge of allEdges) {
-    if (statusWidgetIds.has(edge.source) || statusWidgetIds.has(edge.target)) {
+    const sourceWidget = widgetMap.get(edge.source);
+    const targetWidget = widgetMap.get(edge.target);
+
+    if (!sourceWidget || !targetWidget) {
+      console.log(`[Startup] Cleaning up orphaned edge: ${edge.id}`);
+      await edgeRepo.delete(edge.id);
+      continue;
+    }
+
+    const sourceIsStatusWidget = !sourceWidget.type || sourceWidget.type === 'widget';
+    const targetIsStatusWidget = !targetWidget.type || targetWidget.type === 'widget';
+    const targetIsMilestone = targetWidget.type === 'milestone';
+
+    if ((sourceIsStatusWidget && !targetIsMilestone) || targetIsStatusWidget) {
       console.log(`[Startup] Cleaning up invalid edge connected to status widget: ${edge.id}`);
       await edgeRepo.delete(edge.id);
     }
