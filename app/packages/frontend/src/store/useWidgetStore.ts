@@ -4,7 +4,7 @@ import { ClientMessage, ServerMessage, Widget, Edge } from '@mc/shared';
 interface WidgetStore {
   widgets: Map<string, Widget>;
   edges: Edge[];
-  selectedWidgetId: string | null;
+  selectedWidgetIds: string[];
   isConnected: boolean;
   isHelpOpen: boolean;
   helpTab: 'scripting' | 'edges';
@@ -98,8 +98,8 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
               next.delete(msg.id);
               
               // If the deleted widget was selected, deselect it
-              const nextSelectedId = state.selectedWidgetId === msg.id ? null : state.selectedWidgetId;
-              return { widgets: next, selectedWidgetId: nextSelectedId };
+              const nextSelectedIds = state.selectedWidgetIds.filter((id) => id !== msg.id);
+              return { widgets: next, selectedWidgetIds: nextSelectedIds };
             });
             break;
           case 'edge:created':
@@ -146,7 +146,7 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
   return {
     widgets: new Map<string, Widget>(),
     edges: [],
-    selectedWidgetId: null,
+    selectedWidgetIds: [],
     isConnected: false,
     isHelpOpen: false,
     helpTab: 'scripting',
@@ -164,7 +164,7 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
     },
 
     selectWidget: (id: string | null) => {
-      set({ selectedWidgetId: id });
+      set({ selectedWidgetIds: id ? [id] : [] });
     },
 
     setHelpOpen: (open: boolean, tab?: 'scripting' | 'edges') => {

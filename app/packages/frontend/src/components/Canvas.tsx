@@ -42,7 +42,7 @@ const generateEdgeId = () => {
 const Canvas: React.FC = () => {
   const widgets = useWidgetStore((state) => state.widgets);
   const edges = useWidgetStore((state) => state.edges);
-  const selectedWidgetId = useWidgetStore((state) => state.selectedWidgetId);
+  const selectedWidgetIds = useWidgetStore((state) => state.selectedWidgetIds || []);
   const selectWidget = useWidgetStore((state) => state.selectWidget);
   const send = useWidgetStore((state) => state.send);
 
@@ -77,9 +77,11 @@ const Canvas: React.FC = () => {
 
   // Sync widgets (Zustand Map) to React Flow nodes state
   useEffect(() => {
-    setNodes(
-      Array.from(widgets.values()).map((w) => {
-        const isSelected = selectedWidgetId === w._id;
+    setNodes((prevNodes) => {
+      const existingNodes = new Map(prevNodes.map((n) => [n.id, n]));
+
+      return Array.from(widgets.values()).map((w) => {
+        const isSelected = selectedWidgetIds.includes(w._id);
         const type =
           w.type === 'label'
             ? 'labelNode'
@@ -90,21 +92,29 @@ const Canvas: React.FC = () => {
             : w.type === 'milestone'
             ? 'milestoneNode'
             : 'widgetNode';
+
+        const existing = existingNodes.get(w._id);
+        // Keep current local position if node is dragging or selected to prevent snap-back
+        const position = (existing && (existing.dragging || existing.selected))
+          ? existing.position
+          : w.position;
+
         return {
           id: w._id,
           type,
-          position: w.position,
+          position,
           data: w,
           selected: isSelected,
+          dragging: existing?.dragging,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
           style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown' || w.type === 'milestone') ? {
             width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : w.type === 'milestone' ? 320 : 150),
             height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : w.type === 'milestone' ? 240 : 60),
           } : undefined,
         } as FlowNode;
-      })
-    );
-  }, [widgets, selectedWidgetId, setNodes]);
+      });
+    });
+  }, [widgets, selectedWidgetIds, setNodes]);
 
   // Sync edges (Zustand Array) to React Flow edges state
   useEffect(() => {
@@ -277,13 +287,64 @@ const Canvas: React.FC = () => {
 
   // Sync node dragging position back to server
   const onNodeDragStop = useCallback(
-    (_event: React.MouseEvent, node: FlowNode) => {
-      send({
-        type: 'widget:update',
-        id: node.id,
-        payload: {
-          position: node.position,
-        },
+    (_event: React.MouseEvent, node: FlowNode, nodes: FlowNode[]) => {
+      const draggedNodes = nodes && nodes.length > 0 ? nodes : [node];
+
+      // Optimistically update the Zustand store immediately to prevent any snap-back
+      useWidgetStore.setState((state) => {
+        const next = new Map(state.widgets);
+        draggedNodes.forEach((n) => {
+          const w = next.get(n.id);
+          if (w) {
+            next.set(n.id, {
+              ...w,
+              position: n.position,
+            });
+          }
+        });
+        return { widgets: next };
+      });
+
+      // Send to server
+      draggedNodes.forEach((n) => {
+        send({
+          type: 'widget:update',
+          id: n.id,
+          payload: {
+            position: n.position,
+          },
+        });
+      });
+    },
+    [send]
+  );
+
+  const onSelectionDragStop = useCallback(
+    (_event: React.MouseEvent, nodes: FlowNode[]) => {
+      // Optimistically update the Zustand store immediately to prevent any snap-back
+      useWidgetStore.setState((state) => {
+        const next = new Map(state.widgets);
+        nodes.forEach((n) => {
+          const w = next.get(n.id);
+          if (w) {
+            next.set(n.id, {
+              ...w,
+              position: n.position,
+            });
+          }
+        });
+        return { widgets: next };
+      });
+
+      // Send to server
+      nodes.forEach((n) => {
+        send({
+          type: 'widget:update',
+          id: n.id,
+          payload: {
+            position: n.position,
+          },
+        });
       });
     },
     [send]
@@ -334,6 +395,17 @@ const Canvas: React.FC = () => {
     [send]
   );
 
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: FlowNode[] }) => {
+    const selectedIds = selectedNodes.map((n) => n.id);
+    const currentIds = useWidgetStore.getState().selectedWidgetIds;
+    const isDifferent =
+      selectedIds.length !== currentIds.length ||
+      selectedIds.some((id) => !currentIds.includes(id));
+    if (isDifferent) {
+      useWidgetStore.setState({ selectedWidgetIds: selectedIds });
+    }
+  }, []);
+
   // Handle pane click (closes config panel if clicked outside nodes)
   const onPaneClick = useCallback(() => {
     selectWidget(null);
@@ -346,11 +418,13 @@ const Canvas: React.FC = () => {
         edges={rfEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
+        onSelectionDragStop={onSelectionDragStop}
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
         onPaneClick={onPaneClick}

@@ -1421,5 +1421,27 @@ body, html, #root {
   flex-shrink: 0;
 }
 
+/* Bulk Action / Selection Styles */
+.bulk-selection-summary {
+  background: var(--bg-card);
+  border: var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
 
+.bulk-selection-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
 
+.bulk-selection-details {
+  font-size: 12px;
+  color: var(--text-muted);
+}

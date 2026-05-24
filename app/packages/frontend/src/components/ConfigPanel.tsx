@@ -37,7 +37,7 @@ export async function run({ env }) {
 }`;
 
 export const ConfigPanel: React.FC = () => {
-  const selectedWidgetId = useWidgetStore((state) => state.selectedWidgetId);
+  const selectedWidgetIds = useWidgetStore((state) => state.selectedWidgetIds || []);
   const widgets = useWidgetStore((state) => state.widgets);
   const selectWidget = useWidgetStore((state) => state.selectWidget);
   const send = useWidgetStore((state) => state.send);
@@ -45,6 +45,7 @@ export const ConfigPanel: React.FC = () => {
   const helpTab = useWidgetStore((state) => state.helpTab);
   const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
 
+  const selectedWidgetId = selectedWidgetIds.length === 1 ? selectedWidgetIds[0] : null;
   const widget = selectedWidgetId ? widgets.get(selectedWidgetId) : null;
 
   // Local form state
@@ -174,10 +175,76 @@ export const ConfigPanel: React.FC = () => {
     }
   }, [selectedWidgetId]);
 
-  if (!widget) {
+  if (selectedWidgetIds.length === 0) {
     return (
       <div className="config-panel">
         {/* Render empty or closed config panel */}
+      </div>
+    );
+  }
+
+  if (selectedWidgetIds.length > 1) {
+    // Render bulk action panel
+    const selectedWidgets = selectedWidgetIds.map(id => widgets.get(id)).filter(Boolean) as Widget[];
+    
+    // Group them by type to display count summary
+    const countByType: Record<string, number> = {};
+    selectedWidgets.forEach((w) => {
+      const typeLabel = w.type === 'label'
+        ? 'Label'
+        : w.type === 'rectangle'
+        ? 'Rectangle'
+        : w.type === 'markdown'
+        ? 'Markdown'
+        : w.type === 'milestone'
+        ? 'Milestone'
+        : 'Widget';
+      countByType[typeLabel] = (countByType[typeLabel] || 0) + 1;
+    });
+
+    const summaryText = Object.entries(countByType)
+      .map(([type, count]) => `${count} ${type}${count > 1 ? 's' : ''}`)
+      .join(', ');
+
+    const handleBulkDelete = () => {
+      if (confirm(`Are you sure you want to delete these ${selectedWidgets.length} elements?`)) {
+        selectedWidgets.forEach((w) => {
+          send({ type: 'widget:delete', id: w._id });
+        });
+        selectWidget(null);
+      }
+    };
+
+    return (
+      <div className="config-panel open">
+        <div className="config-header">
+          <h3 className="config-title">Bulk Actions</h3>
+          <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
+            &times;
+          </button>
+        </div>
+        <div className="config-body">
+          <div className="bulk-selection-summary">
+            <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}>📦</span>
+            <div className="bulk-selection-count">
+              <strong>{selectedWidgets.length} elements selected</strong>
+            </div>
+            <div className="bulk-selection-details">
+              ({summaryText})
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+            <button
+              type="button"
+              className="action-btn action-btn-delete"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={handleBulkDelete}
+            >
+              🗑️ Delete Selection
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -476,7 +543,7 @@ export const ConfigPanel: React.FC = () => {
   };
 
   return (
-    <div className={`config-panel ${selectedWidgetId ? 'open' : ''}`}>
+    <div className={`config-panel ${selectedWidgetIds.length > 0 ? 'open' : ''}`}>
       <div className="config-header">
         <h3 className="config-title">
           Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : isMilestone ? 'Milestone' : 'Widget'}
