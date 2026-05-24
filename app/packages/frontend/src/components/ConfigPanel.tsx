@@ -3,12 +3,12 @@ import { useWidgetStore } from '../store/useWidgetStore';
 import { EnvVar, Widget } from '@mc/shared';
 
 const DEFAULT_CODE_TEMPLATE = `// Write your health check script here.
-// Must export an async run(ctx) function that returns:
+// Must export an async run({ env }) function that returns:
 // { status: 'ok' | 'degraded' | 'fail', message?: string, output?: any }
-// Use ctx.KEY to access environment variables.
+// Use env.KEY to access environment variables.
 
-export async function run(ctx) {
-  const url = ctx.TARGET_URL || 'https://httpbin.org/status/200';
+export async function run({ env }) {
+  const url = env.TARGET_URL || 'https://httpbin.org/status/200';
   
   try {
     const start = Date.now();
@@ -41,6 +41,8 @@ export const ConfigPanel: React.FC = () => {
   const widgets = useWidgetStore((state) => state.widgets);
   const selectWidget = useWidgetStore((state) => state.selectWidget);
   const send = useWidgetStore((state) => state.send);
+  const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
+  const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
 
   const widget = selectedWidgetId ? widgets.get(selectedWidgetId) : null;
 
@@ -361,7 +363,30 @@ export const ConfigPanel: React.FC = () => {
 
               {/* Code Textarea */}
               <div className="form-group">
-                <label className="form-label">Script Code (TypeScript)</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="form-label">Script Code (TypeScript)</label>
+                  <button
+                    type="button"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--accent)',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      textDecoration: 'underline'
+                    }}
+                    onClick={() => setHelpOpen(!isHelpOpen)}
+                    title="Toggle scripting guide and examples"
+                  >
+                    <span>❓</span>
+                    <span>Help & Examples</span>
+                  </button>
+                </div>
                 <textarea
                   className="form-input code-textarea"
                   rows={12}

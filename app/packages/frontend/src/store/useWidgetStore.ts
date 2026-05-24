@@ -6,11 +6,13 @@ interface WidgetStore {
   edges: Edge[];
   selectedWidgetId: string | null;
   isConnected: boolean;
+  isHelpOpen: boolean;
 
   // Actions
   connectWebSocket: () => void;
   send: (msg: ClientMessage) => void;
   selectWidget: (id: string | null) => void;
+  setHelpOpen: (open: boolean) => void;
 }
 
 let socket: WebSocket | null = null;
@@ -145,6 +147,7 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
     edges: [],
     selectedWidgetId: null,
     isConnected: false,
+    isHelpOpen: false,
 
     connectWebSocket: () => {
       connect();
@@ -160,6 +163,10 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
 
     selectWidget: (id: string | null) => {
       set({ selectedWidgetId: id });
+    },
+
+    setHelpOpen: (open: boolean) => {
+      set({ isHelpOpen: open });
     },
   };
 });

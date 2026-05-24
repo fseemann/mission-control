@@ -1,4 +1,5 @@
 import React from 'react';
+import { useWidgetStore } from '../store/useWidgetStore';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -6,6 +7,9 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
+  const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
+  const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
+
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -72,6 +76,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               </div>
             </div>
           </div>
+
+          <div className="sidebar-section-title" style={{ marginTop: '28px' }}>Help & Docs</div>
+          <button
+            type="button"
+            className="sidebar-help-btn"
+            onClick={() => setHelpOpen(!isHelpOpen)}
+            title="Toggle status widget scripting guide and code examples"
+          >
+            <span>❓</span>
+            <span>Scripting Guide</span>
+          </button>
         </div>
       </div>
       

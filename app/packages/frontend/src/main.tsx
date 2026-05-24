@@ -4,6 +4,7 @@ import { useWidgetStore } from './store/useWidgetStore';
 import Canvas from './components/Canvas';
 import Sidebar from './components/Sidebar';
 import ConfigPanel from './components/ConfigPanel';
+import HelpPanel from './components/HelpPanel';
 import './styles/index.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Canvas />
       </div>
       <ConfigPanel />
+      <HelpPanel />
     </div>
   );
 }
