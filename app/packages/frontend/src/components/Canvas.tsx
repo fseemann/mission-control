@@ -47,6 +47,8 @@ const Canvas: React.FC = () => {
   const send = useWidgetStore((state) => state.send);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const isSelectionDraggingRef = useRef(false);
+  const pendingSelectedIdsRef = useRef<string[]>([]);
   const { project } = useReactFlow();
 
   const [initialViewport] = React.useState<Viewport | undefined>(() => {
@@ -395,14 +397,35 @@ const Canvas: React.FC = () => {
     [send]
   );
 
-  const onSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: FlowNode[] }) => {
-    const selectedIds = selectedNodes.map((n) => n.id);
+  const onSelectionStart = useCallback(() => {
+    isSelectionDraggingRef.current = true;
+    pendingSelectedIdsRef.current = [];
+  }, []);
+
+  const onSelectionEnd = useCallback(() => {
+    isSelectionDraggingRef.current = false;
+    const selectedIds = pendingSelectedIdsRef.current;
     const currentIds = useWidgetStore.getState().selectedWidgetIds;
     const isDifferent =
       selectedIds.length !== currentIds.length ||
       selectedIds.some((id) => !currentIds.includes(id));
     if (isDifferent) {
       useWidgetStore.setState({ selectedWidgetIds: selectedIds });
+    }
+  }, []);
+
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: FlowNode[] }) => {
+    const selectedIds = selectedNodes.map((n) => n.id);
+    if (isSelectionDraggingRef.current) {
+      pendingSelectedIdsRef.current = selectedIds;
+    } else {
+      const currentIds = useWidgetStore.getState().selectedWidgetIds;
+      const isDifferent =
+        selectedIds.length !== currentIds.length ||
+        selectedIds.some((id) => !currentIds.includes(id));
+      if (isDifferent) {
+        useWidgetStore.setState({ selectedWidgetIds: selectedIds });
+      }
     }
   }, []);
 
@@ -419,6 +442,8 @@ const Canvas: React.FC = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onSelectionChange={onSelectionChange}
+        onSelectionStart={onSelectionStart}
+        onSelectionEnd={onSelectionEnd}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onDragOver={onDragOver}
