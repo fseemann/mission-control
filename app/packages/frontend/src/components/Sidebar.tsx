@@ -26,7 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         </div>
 
         <div className="sidebar-content">
-          <div className="sidebar-section-title">Available Widgets</div>
+          <div className="sidebar-section-title">Widgets</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
             <div
               className="draggable-widget"
@@ -50,11 +50,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               className="draggable-widget"
               draggable
               onDragStart={(e) => onDragStart(e, 'labelNode')}
-              title="Drag onto canvas to create a text label annotation"
+              title="Drag onto canvas to create a label annotation"
             >
               <span className="widget-icon">📝</span>
               <div>
-                <strong>Text Label</strong>
+                <strong>Label</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Canvas text annotation
                 </div>
@@ -80,11 +80,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               className="draggable-widget"
               draggable
               onDragStart={(e) => onDragStart(e, 'markdownNode')}
-              title="Drag onto canvas to create a markdown text note"
+              title="Drag onto canvas to create a markdown card"
             >
               <span className="widget-icon">📄</span>
               <div>
-                <strong>Markdown Note</strong>
+                <strong>Markdown</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Rich-text canvas card
                 </div>
@@ -112,7 +112,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         aria-label="Toggle Sidebar"
       >
-        {isCollapsed ? '➡️' : '⬅️'}
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="14" 
+          height="14" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          className={`sidebar-toggle-icon ${isCollapsed ? 'collapsed' : ''}`}
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
       </button>
     </>
   );

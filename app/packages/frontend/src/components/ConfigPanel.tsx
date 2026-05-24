@@ -414,7 +414,7 @@ export const ConfigPanel: React.FC = () => {
     <div className={`config-panel ${selectedWidgetId ? 'open' : ''}`}>
       <div className="config-header">
         <h3 className="config-title">
-          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown Note' : 'Widget'}
+          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : 'Widget'}
         </h3>
         <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
           &times;
@@ -831,7 +831,7 @@ export const ConfigPanel: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
             <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown Note' : 'Widget'}
+              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : 'Widget'}
             </button>
           </div>
         </form>

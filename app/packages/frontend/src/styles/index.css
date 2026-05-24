@@ -170,25 +170,48 @@ body, html, #root {
 /* Collapse Toggle Button (for Sidebar) */
 .sidebar-toggle-btn {
   position: absolute;
-  top: 16px;
+  top: 10px;
   left: calc(var(--sidebar-width) - 14px);
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--bg-sidebar);
   border: 1px solid #E5E7EB;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 15;
-  transition: var(--transition);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+              background var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              transform var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .sidebar-toggle-btn:hover {
-  background: #F9FAFB;
-  border-color: var(--text-muted);
+  border-color: var(--accent);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.15), 0 2px 4px rgba(99, 102, 241, 0.1);
+  transform: scale(1.1);
+}
+
+.sidebar-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.sidebar-toggle-icon {
+  transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+              color var(--transition-speed) ease;
+  color: var(--text-secondary);
+}
+
+.sidebar-toggle-btn:hover .sidebar-toggle-icon {
+  color: var(--accent);
+}
+
+.sidebar-toggle-icon.collapsed {
+  transform: rotate(180deg);
 }
 
 .app-container.sidebar-collapsed .sidebar-toggle-btn {

@@ -139,7 +139,7 @@ const Canvas: React.FC = () => {
           type: 'widget:create',
           payload: {
             type: 'label',
-            label: 'Text Label',
+            label: 'Label',
             code: '',
             envVars: [],
             timeoutMs: 10000,
@@ -177,7 +177,7 @@ const Canvas: React.FC = () => {
           type: 'widget:create',
           payload: {
             type: 'markdown',
-            label: '# Markdown Note\n\nDouble-click to edit! Supports:\n- **Bold** & *italics*\n- Lists\n- `Code inline` and blocks\n\n```js\n// Example code\nconsole.log("Hello!");\n```',
+            label: '# Markdown\n\nDouble-click to edit! Supports:\n- **Bold** & *italics*\n- Lists\n- `Code inline` and blocks\n\n```js\n// Example code\nconsole.log("Hello!");\n```',
             code: '',
             envVars: [],
             timeoutMs: 10000,
