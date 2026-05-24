@@ -21,10 +21,14 @@ export class MongoWidgetRepository implements IWidgetRepository {
   }
 
   async create(data: NewWidget): Promise<Widget> {
-    const encryptedEnvVars = (data.envVars || []).map(ev => ({
-      key: ev.key,
-      value: this.crypto.encrypt(ev.value)
-    }));
+    const encryptedEnvVars = (data.envVars || []).map(ev => {
+      const isSec = ev.isSecret !== false;
+      return {
+        key: ev.key,
+        value: isSec ? this.crypto.encrypt(ev.value) : ev.value,
+        isSecret: isSec
+      };
+    });
 
     const doc = {
       type: data.type || 'widget',
@@ -45,7 +49,11 @@ export class MongoWidgetRepository implements IWidgetRepository {
     return {
       _id: result.insertedId.toHexString(),
       ...doc,
-      envVars: data.envVars || [] // Return decrypted (plaintext) envVars
+      envVars: (data.envVars || []).map(ev => ({
+        key: ev.key,
+        value: ev.value,
+        isSecret: ev.isSecret !== false
+      }))
     };
   }
 
@@ -57,10 +65,14 @@ export class MongoWidgetRepository implements IWidgetRepository {
     const updateDoc: any = {};
 
     if (patch.envVars !== undefined) {
-      updateDoc.envVars = patch.envVars.map(ev => ({
-        key: ev.key,
-        value: this.crypto.encrypt(ev.value)
-      }));
+      updateDoc.envVars = patch.envVars.map(ev => {
+        const isSec = ev.isSecret !== false;
+        return {
+          key: ev.key,
+          value: isSec ? this.crypto.encrypt(ev.value) : ev.value,
+          isSecret: isSec
+        };
+      });
     }
 
     // Copy other fields if defined
@@ -138,10 +150,14 @@ export class MongoWidgetRepository implements IWidgetRepository {
   }
 
   private mapDocToWidget(doc: any): Widget {
-    const decryptedEnvVars = (doc.envVars || []).map((ev: any) => ({
-      key: ev.key,
-      value: this.crypto.decrypt(ev.value)
-    }));
+    const decryptedEnvVars = (doc.envVars || []).map((ev: any) => {
+      const isSec = ev.isSecret !== false;
+      return {
+        key: ev.key,
+        value: isSec ? this.crypto.decrypt(ev.value) : ev.value,
+        isSecret: isSec
+      };
+    });
 
     return {
       _id: doc._id.toHexString(),

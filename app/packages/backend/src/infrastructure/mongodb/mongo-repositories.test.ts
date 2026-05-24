@@ -76,8 +76,9 @@ describe('Mongo Repositories', () => {
         label: 'Test Widget',
         code: 'console.log("hello")',
         envVars: [
-          { key: 'API_KEY', value: 'secret-token' },
-          { key: 'PORT', value: '8080' }
+          { key: 'API_KEY', value: 'secret-token', isSecret: true },
+          { key: 'PORT', value: '8080', isSecret: false },
+          { key: 'HOST', value: 'localhost' } // defaults to secret
         ],
         position: { x: 10, y: 20 },
         cronExpression: '*/5 * * * *',
@@ -88,7 +89,13 @@ describe('Mongo Repositories', () => {
       const created = await repo.create(newWidget);
       expect(created._id).toBeDefined();
       expect(created.label).toBe(newWidget.label);
-      expect(created.envVars).toEqual(newWidget.envVars); // plaintext returned
+      
+      const expectedEnvVars = [
+        { key: 'API_KEY', value: 'secret-token', isSecret: true },
+        { key: 'PORT', value: '8080', isSecret: false },
+        { key: 'HOST', value: 'localhost', isSecret: true }
+      ];
+      expect(created.envVars).toEqual(expectedEnvVars); // plaintext returned
       expect(created.timeoutMs).toBe(5000);
       expect(created.status).toBe('idle');
       
@@ -97,21 +104,36 @@ describe('Mongo Repositories', () => {
       expect(rawDoc).toBeDefined();
       expect(rawDoc.envVars[0].value).not.toBe('secret-token'); // encrypted
       expect(cryptoMod.decrypt(rawDoc.envVars[0].value)).toBe('secret-token');
+      expect(rawDoc.envVars[0].isSecret).toBe(true);
+
+      expect(rawDoc.envVars[1].value).toBe('8080'); // cleartext
+      expect(rawDoc.envVars[1].isSecret).toBe(false);
+
+      expect(rawDoc.envVars[2].value).not.toBe('localhost'); // encrypted (default)
+      expect(cryptoMod.decrypt(rawDoc.envVars[2].value)).toBe('localhost');
+      expect(rawDoc.envVars[2].isSecret).toBe(true);
 
       // 2. FindById
       const found = await repo.findById(created._id);
       expect(found).not.toBeNull();
-      expect(found!.envVars).toEqual(newWidget.envVars); // decrypted
+      expect(found!.envVars).toEqual(expectedEnvVars); // decrypted
 
       // 3. Update env vars
       const updated = await repo.update(created._id, {
-        envVars: [{ key: 'API_KEY', value: 'new-token' }]
+        envVars: [
+          { key: 'API_KEY', value: 'new-token', isSecret: true },
+          { key: 'PORT', value: '9090', isSecret: false }
+        ]
       });
       expect(updated.envVars[0].value).toBe('new-token');
+      expect(updated.envVars[0].isSecret).toBe(true);
+      expect(updated.envVars[1].value).toBe('9090');
+      expect(updated.envVars[1].isSecret).toBe(false);
       
       // Verify DB has new encrypted value
       const rawDoc2 = (mockCol as any).data.get(created._id);
       expect(cryptoMod.decrypt(rawDoc2.envVars[0].value)).toBe('new-token');
+      expect(rawDoc2.envVars[1].value).toBe('9090');
 
       // 3.5. Update and unset cronExpression
       const updatedCron = await repo.update(created._id, {

@@ -329,10 +329,10 @@ export const ConfigPanel: React.FC = () => {
   };
 
   const handleAddEnvRow = () => {
-    setEnvVars([...envVars, { key: '', value: '' }]);
+    setEnvVars([...envVars, { key: '', value: '', isSecret: true }]);
   };
 
-  const handleUpdateEnvRow = (index: number, field: keyof EnvVar, val: string) => {
+  const handleUpdateEnvRow = (index: number, field: keyof EnvVar, val: any) => {
     const next = [...envVars];
     next[index] = { ...next[index], [field]: val };
     setEnvVars(next);
@@ -643,7 +643,8 @@ export const ConfigPanel: React.FC = () => {
                   <thead>
                     <tr>
                       <th>Key</th>
-                      <th>Value (Secret)</th>
+                      <th>Value</th>
+                      <th style={{ width: '60px', textAlign: 'center' }}>Secret</th>
                       <th style={{ width: '40px' }}></th>
                     </tr>
                   </thead>
@@ -660,15 +661,41 @@ export const ConfigPanel: React.FC = () => {
                             required
                           />
                         </td>
-                        <td>
+                        <td style={{ paddingRight: '8px' }}>
                           <input
-                            type="password"
+                            type={v.isSecret !== false ? "password" : "text"}
                             className="form-input"
-                            placeholder="Value"
+                            placeholder={v.isSecret !== false ? "Secret Value" : "Value"}
                             value={v.value}
                             onChange={(e) => handleUpdateEnvRow(i, 'value', e.target.value)}
                             required={v.key.trim() !== ''}
                           />
+                        </td>
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                          {(() => {
+                            const isSavedSecret = widget.envVars?.some(
+                              (savedVar) => savedVar.key === v.key && (savedVar.isSecret === undefined || savedVar.isSecret === true)
+                            );
+                            return (
+                              <input
+                                type="checkbox"
+                                checked={v.isSecret !== false}
+                                disabled={isSavedSecret}
+                                onChange={(e) => handleUpdateEnvRow(i, 'isSecret', e.target.checked)}
+                                title={
+                                  isSavedSecret
+                                    ? "Saved secrets cannot be unticked"
+                                    : "Toggle secret encryption"
+                                }
+                                style={{
+                                  cursor: isSavedSecret ? 'not-allowed' : 'pointer',
+                                  width: '16px',
+                                  height: '16px',
+                                  margin: 0
+                                }}
+                              />
+                            );
+                          })()}
                         </td>
                         <td>
                           <button

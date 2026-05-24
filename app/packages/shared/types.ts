@@ -22,6 +22,7 @@ export type WidgetStatus =
 export interface EnvVar {
   key: string;
   value: string;
+  isSecret?: boolean;
 }
 
 export interface MilestoneItem {
