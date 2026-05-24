@@ -42,6 +42,7 @@ export interface ElementStyle {
   borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
   borderRadius?: number;
   fontSize?: number;
+  zIndex?: number;
 }
 
 export interface Widget {

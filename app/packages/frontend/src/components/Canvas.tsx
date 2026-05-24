@@ -1,11 +1,11 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import ReactFlow, {
   Background,
+  BackgroundVariant,
   Controls,
   MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
   Connection,
   Edge as FlowEdge,
   Node as FlowNode,
@@ -44,34 +44,42 @@ const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { project } = useReactFlow();
 
-  // Map widgets (Zustand Map) to React Flow Node array
-  const flowNodes = useMemo(() => {
-    return Array.from(widgets.values()).map((w) => {
-      const isSelected = selectedWidgetId === w._id;
-      const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : 'widgetNode';
-      return {
-        id: w._id,
-        type,
-        position: w.position,
-        data: w,
-        selected: isSelected,
-        style: w.type === 'rectangle' ? {
-          width: w.style?.width ?? 200,
-          height: w.style?.height ?? 150,
-        } : undefined,
-      } as FlowNode;
-    });
-  }, [widgets, selectedWidgetId]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [rfEdges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Map edges (Zustand Array) to React Flow Edge array
-  const flowEdges = useMemo(() => {
-    return edges.map((e) => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      label: e.label,
-    })) as FlowEdge[];
-  }, [edges]);
+  // Sync widgets (Zustand Map) to React Flow nodes state
+  useEffect(() => {
+    setNodes(
+      Array.from(widgets.values()).map((w) => {
+        const isSelected = selectedWidgetId === w._id;
+        const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : 'widgetNode';
+        return {
+          id: w._id,
+          type,
+          position: w.position,
+          data: w,
+          selected: isSelected,
+          zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
+          style: w.type === 'rectangle' ? {
+            width: w.style?.width ?? 200,
+            height: w.style?.height ?? 150,
+          } : undefined,
+        } as FlowNode;
+      })
+    );
+  }, [widgets, selectedWidgetId, setNodes]);
+
+  // Sync edges (Zustand Array) to React Flow edges state
+  useEffect(() => {
+    setEdges(
+      edges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        label: e.label,
+      })) as FlowEdge[]
+    );
+  }, [edges, setEdges]);
 
   // Handle drag over to enable drop
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -155,7 +163,7 @@ const Canvas: React.FC = () => {
 
   // Sync node dragging position back to server
   const onNodeDragStop = useCallback(
-    (event: React.MouseEvent, node: FlowNode) => {
+    (_event: React.MouseEvent, node: FlowNode) => {
       send({
         type: 'widget:update',
         id: node.id,
@@ -236,8 +244,10 @@ const Canvas: React.FC = () => {
       </div>
 
       <ReactFlow
-        nodes={flowNodes}
-        edges={flowEdges}
+        nodes={nodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onDragOver={onDragOver}
@@ -248,7 +258,7 @@ const Canvas: React.FC = () => {
         onPaneClick={onPaneClick}
         fitView
       >
-        <Background variant="dots" color="#D1D5DB" gap={16} size={1} />
+        <Background variant={BackgroundVariant.Dots} color="#D1D5DB" gap={16} size={1} />
         <Controls position="top-right" />
         <MiniMap position="bottom-right" nodeStrokeWidth={3} zoomable pannable />
       </ReactFlow>
