@@ -203,51 +203,6 @@ body, html, #root {
   background: var(--bg-canvas);
 }
 
-/* Custom Add Widget Button / Toolbar */
-.canvas-toolbar {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 5;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 4px;
-  display: flex;
-  gap: 4px;
-  box-shadow: var(--shadow-card);
-}
-
-.toolbar-btn {
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition);
-}
-
-.toolbar-btn:hover {
-  background: var(--accent-light);
-  color: var(--accent);
-}
-
-.toolbar-btn-primary {
-  background: var(--accent);
-  color: var(--text-on-accent);
-}
-
-.toolbar-btn-primary:hover {
-  background: var(--accent-hover);
-  color: var(--text-on-accent);
-}
-
 /* Custom React Flow Node Card */
 .widget-node-card {
   background: var(--bg-card);

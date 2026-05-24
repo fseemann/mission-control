@@ -233,42 +233,8 @@ const Canvas: React.FC = () => {
     selectWidget(null);
   }, [selectWidget]);
 
-  // Handle toolbar add button (centers new widget on current screen)
-  const handleAddWidget = useCallback(() => {
-    if (!reactFlowWrapper.current) return;
-    const rect = reactFlowWrapper.current.getBoundingClientRect();
-    
-    // Compute center coordinates
-    const position = project({
-      x: rect.width / 2 - 110, // Offset half width of custom node card
-      y: rect.height / 2 - 40,
-    });
-
-    send({
-      type: 'widget:create',
-      payload: {
-        label: 'Status Widget',
-        code: '',
-        envVars: [],
-        timeoutMs: 10000,
-        position,
-      },
-    });
-  }, [project, send]);
-
   return (
     <div className="canvas-wrapper" ref={reactFlowWrapper}>
-      {/* Top toolbar */}
-      <div className="canvas-toolbar">
-        <button
-          className="toolbar-btn toolbar-btn-primary"
-          onClick={handleAddWidget}
-          title="Add a new widget to the center of the canvas"
-        >
-          ➕ Add Widget
-        </button>
-      </div>
-
       <ReactFlow
         nodes={nodes}
         edges={rfEdges}
