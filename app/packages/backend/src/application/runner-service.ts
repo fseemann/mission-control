@@ -38,7 +38,7 @@ export class RunnerService {
     const harnessContent = `// auto-generated runner harness
 import { run } from '${userCodePath}';
 const env = JSON.parse(process.env.__MC_ENV__!);
-const result = await run(env);
+const result = await run({ env });
 process.stdout.write(JSON.stringify(result));
 `;
 

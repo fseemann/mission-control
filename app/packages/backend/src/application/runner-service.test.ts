@@ -58,7 +58,7 @@ describe('RunnerService', () => {
     const widget = await repo.create({
       label: 'Healthy Widget',
       code: `
-        export async function run(env: Record<string, string>) {
+        export async function run(ctx: { env: Record<string, string> }) {
           return {
             status: 'ok' as const,
             message: 'All good!',
@@ -104,7 +104,7 @@ describe('RunnerService', () => {
     const widget = await repo.create({
       label: 'Slow Widget',
       code: `
-        export async function run(env: Record<string, string>) {
+        export async function run(ctx: { env: Record<string, string> }) {
           await new Promise(resolve => setTimeout(resolve, 3000));
           return {
             status: 'ok' as const,
@@ -141,7 +141,7 @@ describe('RunnerService', () => {
     const widget = await repo.create({
       label: 'Buggy Widget',
       code: `
-        export async function run(env: Record<string, string>) {
+        export async function run(ctx: { env: Record<string, string> }) {
           throw new Error('Boom!');
         }
       `,

@@ -5,10 +5,10 @@ import { EnvVar, Widget } from '@mc/shared';
 const DEFAULT_CODE_TEMPLATE = `// Write your health check script here.
 // Must export an async run(ctx) function that returns:
 // { status: 'ok' | 'degraded' | 'fail', message?: string, output?: any }
-// Use ctx.env.KEY to access environment variables.
+// Use ctx.KEY to access environment variables.
 
 export async function run(ctx) {
-  const url = ctx.env.TARGET_URL || 'https://httpbin.org/status/200';
+  const url = ctx.TARGET_URL || 'https://httpbin.org/status/200';
   
   try {
     const start = Date.now();
@@ -125,7 +125,7 @@ export const ConfigPanel: React.FC = () => {
     e.preventDefault();
     // Filter out empty rows
     const cleanedEnv = envVars.filter((v) => v.key.trim() !== '');
-    
+
     send({
       type: 'widget:update',
       id: widget._id,
@@ -141,7 +141,7 @@ export const ConfigPanel: React.FC = () => {
 
   const handleRunNow = () => {
     send({ type: 'widget:run', id: widget._id });
-    
+
     // Optimistic local update to 'running' for instant visual pulse feedback
     useWidgetStore.setState((state) => {
       const next = new Map(state.widgets);
