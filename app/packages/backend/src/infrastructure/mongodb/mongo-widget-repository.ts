@@ -36,7 +36,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       position: data.position,
       style: data.style,
       status: 'idle' as const,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      milestoneItems: data.milestoneItems || []
     };
 
     const result = await this.col.insertOne(doc as any);
@@ -71,7 +72,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       'position',
       'style',
       'status',
-      'lastResult'
+      'lastResult',
+      'milestoneItems'
     ];
 
     for (const field of fields) {
@@ -153,7 +155,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       style: doc.style,
       status: doc.status,
       lastResult: doc.lastResult,
-      updatedAt: doc.updatedAt
+      updatedAt: doc.updatedAt,
+      milestoneItems: doc.milestoneItems || []
     };
   }
 }

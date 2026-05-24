@@ -31,6 +31,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <div
               className="draggable-widget"
               draggable
+              onDragStart={(e) => onDragStart(e, 'milestoneNode')}
+              title="Drag onto canvas to create a new goal milestone"
+            >
+              <span className="widget-icon">🎯</span>
+              <div>
+                <strong>Milestone</strong>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Track goals and linked statuses
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="draggable-widget"
+              draggable
               onDragStart={(e) => onDragStart(e, 'widgetNode')}
               title="Drag onto canvas to create a new status widget"
             >

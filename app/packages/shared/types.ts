@@ -24,6 +24,12 @@ export interface EnvVar {
   value: string;
 }
 
+export interface MilestoneItem {
+  id: string;
+  text: string;
+  checked: boolean;
+}
+
 export interface Edge {
   id: string;
   source: string;   // widget _id
@@ -31,7 +37,7 @@ export interface Edge {
   label?: string;
 }
 
-export type ElementType = 'widget' | 'label' | 'rectangle' | 'markdown';
+export type ElementType = 'widget' | 'label' | 'rectangle' | 'markdown' | 'milestone';
 
 export interface ElementStyle {
   width?: number;
@@ -58,6 +64,7 @@ export interface Widget {
   status: WidgetStatus;
   lastResult?: ExecutionResult;
   updatedAt: string;
+  milestoneItems?: MilestoneItem[]; // only populated when type === 'milestone'
 }
 
 export interface ExecutionResult {
@@ -79,8 +86,8 @@ export interface ExecutionResult {
 export type ClientMessage =
   // Widgets
   | { type: 'widget:list' }
-  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style'> & { cronExpression?: string } }
-  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style'>> }
+  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems'> & { cronExpression?: string } }
+  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems'>> }
   | { type: 'widget:delete'; id: string }
   | { type: 'widget:run';    id: string }
   // Edges

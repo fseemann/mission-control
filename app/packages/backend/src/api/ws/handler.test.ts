@@ -313,7 +313,7 @@ describe('WsHandler', () => {
     expect(JSON.parse((ws as any).sentMessages[2]).id).toBe('edge-ab');
   });
 
-  test('should reject edge creation if source or target is a status widget', async () => {
+  test('should reject edge creation if status widget connects to non-milestone target', async () => {
     const widgetRepo = new MockWidgetRepository();
     const edgeRepo = new MockEdgeRepository();
     const mockRunner = {} as unknown as RunnerService;
@@ -352,8 +352,52 @@ describe('WsHandler', () => {
     expect((ws as any).sentMessages.length).toBe(1);
     const errorMsg = JSON.parse((ws as any).sentMessages[0]);
     expect(errorMsg.type).toBe('error');
-    expect(errorMsg.message).toBe('Status widgets cannot have edge connections');
+    expect(errorMsg.message).toBe('Status widgets can only connect to Milestone targets');
     expect(edgeRepo.edges.length).toBe(0);
+  });
+
+  test('should allow edge creation from status widget to milestone target', async () => {
+    const widgetRepo = new MockWidgetRepository();
+    const edgeRepo = new MockEdgeRepository();
+    const mockRunner = {} as unknown as RunnerService;
+    const mockScheduler = {} as unknown as SchedulerService;
+
+    const w1 = await widgetRepo.create({
+      label: 'Status Widget',
+      type: 'widget',
+      code: '',
+      envVars: [],
+      timeoutMs: 1000,
+      position: { x: 0, y: 0 }
+    });
+
+    const w2 = await widgetRepo.create({
+      label: 'Milestone Node',
+      type: 'milestone',
+      code: '',
+      envVars: [],
+      timeoutMs: 1000,
+      position: { x: 100, y: 100 }
+    });
+
+    const handler = new WsHandler(widgetRepo, edgeRepo, mockRunner, mockScheduler);
+    const ws = new MockWebSocket() as unknown as ServerWebSocket<any>;
+    handler.handleOpen(ws);
+
+    await handler.handleMessage(ws, JSON.stringify({
+      type: 'edge:create',
+      payload: {
+        id: 'edge-valid',
+        source: w1._id,
+        target: w2._id
+      }
+    } satisfies ClientMessage));
+
+    expect((ws as any).sentMessages.length).toBe(1);
+    const successMsg = JSON.parse((ws as any).sentMessages[0]);
+    expect(successMsg.type).toBe('edge:created');
+    expect(edgeRepo.edges.length).toBe(1);
+    expect(edgeRepo.edges[0].id).toBe('edge-valid');
   });
 
   test('should handle errors gracefully by sending error message to originating socket', async () => {

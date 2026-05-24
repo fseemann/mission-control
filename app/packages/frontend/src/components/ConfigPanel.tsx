@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
-import { EnvVar, Widget } from '@mc/shared';
+import { EnvVar, Widget, MilestoneItem } from '@mc/shared';
 
 const DEFAULT_CODE_TEMPLATE = `// Write your health check script here.
 // Must export an async run({ env }) function that returns:
@@ -52,6 +52,7 @@ export const ConfigPanel: React.FC = () => {
   const [timeoutMs, setTimeoutMs] = useState(10000);
   const [code, setCode] = useState('');
   const [envVars, setEnvVars] = useState<EnvVar[]>([]);
+  const [milestoneItems, setMilestoneItems] = useState<MilestoneItem[]>([]);
 
   // Visual style state
   const [fontSize, setFontSize] = useState(16);
@@ -66,6 +67,9 @@ export const ConfigPanel: React.FC = () => {
   // Ref to track which widget is loaded
   const loadedWidgetIdRef = useRef<string | null>(null);
 
+  // Milestone item helpers for HTML5 Drag-and-Drop sorting
+  const draggedIndexRef = useRef<number | null>(null);
+
   // Sync local form state when selected widget changes (or is loaded for the first time)
   useEffect(() => {
     if (widget) {
@@ -75,6 +79,7 @@ export const ConfigPanel: React.FC = () => {
         setTimeoutMs(widget.timeoutMs ?? 10000);
         setCode(widget.code || DEFAULT_CODE_TEMPLATE);
         setEnvVars(widget.envVars ? JSON.parse(JSON.stringify(widget.envVars)) : []);
+        setMilestoneItems(widget.milestoneItems ? JSON.parse(JSON.stringify(widget.milestoneItems)) : []);
         
         // Sync style fields
         const style = widget.style || {};
@@ -146,15 +151,23 @@ export const ConfigPanel: React.FC = () => {
           stylePayload.borderColor = borderColor;
           stylePayload.borderStyle = borderStyle;
           stylePayload.borderRadius = Number(borderRadius);
+        } else if (prevWidget.type === 'milestone') {
+          stylePayload.width = Number(width);
+          stylePayload.height = Number(height);
+        }
+
+        const updatePayload: any = {
+          label,
+          style: stylePayload,
+        };
+        if (prevWidget.type === 'milestone') {
+          updatePayload.milestoneItems = milestoneItems;
         }
 
         send({
           type: 'widget:update',
           id: prevWidgetId,
-          payload: {
-            label,
-            style: stylePayload,
-          },
+          payload: updatePayload,
         });
       }
     }
@@ -172,6 +185,7 @@ export const ConfigPanel: React.FC = () => {
   const isLabel = widget.type === 'label';
   const isRectangle = widget.type === 'rectangle';
   const isMarkdown = widget.type === 'markdown';
+  const isMilestone = widget.type === 'milestone';
 
   // General reactive update helper
   const triggerReactiveUpdate = (updatedFields: Partial<Widget>, updatedStyle?: any) => {
@@ -327,6 +341,47 @@ export const ConfigPanel: React.FC = () => {
     setEnvVars(envVars.filter((_, i) => i !== index));
   };
 
+  // Milestone item helpers for HTML5 Drag-and-Drop sorting
+  const handleDragStart = (index: number) => {
+    draggedIndexRef.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    const draggedIndex = draggedIndexRef.current;
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const next = [...milestoneItems];
+    const [removed] = next.splice(draggedIndex, 1);
+    next.splice(index, 0, removed);
+
+    draggedIndexRef.current = index;
+    setMilestoneItems(next);
+  };
+
+  const handleDragEnd = () => {
+    draggedIndexRef.current = null;
+  };
+
+  const handleAddMilestoneItem = () => {
+    const newItem = {
+      id: `item_${Math.random().toString(36).substring(2, 11)}`,
+      text: '',
+      checked: false,
+    };
+    setMilestoneItems([...milestoneItems, newItem]);
+  };
+
+  const handleUpdateMilestoneItemText = (index: number, val: string) => {
+    const next = [...milestoneItems];
+    next[index] = { ...next[index], text: val };
+    setMilestoneItems(next);
+  };
+
+  const handleDeleteMilestoneItem = (index: number) => {
+    setMilestoneItems(milestoneItems.filter((_, i) => i !== index));
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -363,6 +418,9 @@ export const ConfigPanel: React.FC = () => {
       stylePayload.borderColor = borderColor;
       stylePayload.borderStyle = borderStyle;
       stylePayload.borderRadius = Number(borderRadius);
+    } else if (isMilestone) {
+      stylePayload.width = Number(width);
+      stylePayload.height = Number(height);
     }
 
     let updatePayload: any = {
@@ -376,6 +434,12 @@ export const ConfigPanel: React.FC = () => {
         timeoutMs: Number(timeoutMs),
         code,
         envVars: cleanedEnv,
+      };
+    } else if (isMilestone) {
+      updatePayload = {
+        ...updatePayload,
+        milestoneItems,
+        style: stylePayload,
       };
     } else {
       updatePayload.style = stylePayload;
@@ -403,7 +467,7 @@ export const ConfigPanel: React.FC = () => {
   };
 
   const handleDeleteWidget = () => {
-    const itemType = isLabel ? 'label' : isRectangle ? 'rectangle' : isMarkdown ? 'markdown' : 'widget';
+    const itemType = isLabel ? 'label' : isRectangle ? 'rectangle' : isMarkdown ? 'markdown' : isMilestone ? 'milestone' : 'widget';
     if (confirm(`Are you sure you want to delete this ${itemType}?`)) {
       send({ type: 'widget:delete', id: widget._id });
       selectWidget(null);
@@ -414,7 +478,7 @@ export const ConfigPanel: React.FC = () => {
     <div className={`config-panel ${selectedWidgetId ? 'open' : ''}`}>
       <div className="config-header">
         <h3 className="config-title">
-          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : 'Widget'}
+          Configure {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : isMilestone ? 'Milestone' : 'Widget'}
         </h3>
         <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
           &times;
@@ -443,11 +507,93 @@ export const ConfigPanel: React.FC = () => {
                 className="form-input"
                 value={label}
                 onChange={(e) => handleLabelChange(e.target.value)}
-                placeholder={isRectangle ? 'e.g. Database Group' : 'e.g. Ping Web Gateway'}
+                placeholder={isRectangle ? 'e.g. Database Group' : isMilestone ? 'e.g. v1.0 Launch' : 'e.g. Ping Web Gateway'}
                 required={!isRectangle}
               />
             )}
           </div>
+
+          {/* Milestone checklist editor */}
+          {isMilestone && (
+            <div className="form-group">
+              <label className="form-label">Checklist Items</label>
+              <div className="milestone-items-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {milestoneItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="milestone-item-row"
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragEnd={handleDragEnd}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: '#F9FAFB',
+                      padding: '8px',
+                      borderRadius: '6px',
+                      border: '1px solid #E5E7EB',
+                    }}
+                  >
+                    {/* Drag handle */}
+                    <div
+                      className="milestone-item-drag-handle"
+                      style={{ cursor: 'grab', color: 'var(--text-muted)', fontSize: '18px', userSelect: 'none' }}
+                      title="Drag to reorder"
+                    >
+                      ⠿
+                    </div>
+
+                    {/* Checkbox (display only / visual state) */}
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => {
+                        const next = [...milestoneItems];
+                        next[index] = { ...next[index], checked: !item.checked };
+                        setMilestoneItems(next);
+                      }}
+                      className="milestone-checkbox"
+                      title="Checked state"
+                    />
+
+                    {/* Text input */}
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ flexGrow: 1, padding: '4px 8px' }}
+                      value={item.text}
+                      onChange={(e) => handleUpdateMilestoneItemText(index, e.target.value)}
+                      placeholder="Task description..."
+                      draggable={false}
+                      onDragStart={(e) => e.stopPropagation()}
+                      required
+                    />
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      className="env-row-delete-btn"
+                      style={{ padding: '4px' }}
+                      onClick={() => handleDeleteMilestoneItem(index)}
+                      title="Delete item"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="add-row-btn"
+                onClick={handleAddMilestoneItem}
+                style={{ marginTop: '4px' }}
+              >
+                + Add Sub-task
+              </button>
+            </div>
+          )}
 
           {/* Widget Specific Fields */}
           {isWidget && (
@@ -642,8 +788,8 @@ export const ConfigPanel: React.FC = () => {
             </>
           )}
 
-          {/* Dimensions (Label, Rectangle & Markdown) */}
-          {(isLabel || isRectangle || isMarkdown) && (
+          {/* Dimensions (Label, Rectangle, Markdown & Milestone) */}
+          {(isLabel || isRectangle || isMarkdown || isMilestone) && (
             <div style={{ display: 'flex', gap: '12px' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label className="form-label">Width (px)</label>
@@ -831,7 +977,7 @@ export const ConfigPanel: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
             <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : 'Widget'}
+              🗑️ Delete {isLabel ? 'Label' : isRectangle ? 'Rectangle' : isMarkdown ? 'Markdown' : isMilestone ? 'Milestone' : 'Widget'}
             </button>
           </div>
         </form>

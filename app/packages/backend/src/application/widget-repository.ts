@@ -1,7 +1,7 @@
 import type { Widget, ExecutionResult, WidgetStatus } from '@mc/shared';
 
 export type NewWidget = Pick<Widget,
-  'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style'
+  'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems'
 > & { cronExpression?: string };
 
 export interface IWidgetRepository {

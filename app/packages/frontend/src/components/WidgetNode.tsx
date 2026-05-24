@@ -1,5 +1,5 @@
 import React from 'react';
-import { NodeProps } from 'reactflow';
+import { NodeProps, Handle, Position } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 
@@ -64,6 +64,11 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
       style={{ borderLeft: `4px solid ${statusColor}` }}
       onDoubleClick={handleDoubleClick}
     >
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+      />
       <div className="widget-node-header">
         <span
           className={`status-dot ${status === 'running' ? 'running' : ''}`}

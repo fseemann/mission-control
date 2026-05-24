@@ -20,12 +20,14 @@ import WidgetNode from './WidgetNode';
 import LabelNode from './LabelNode';
 import RectangleNode from './RectangleNode';
 import MarkdownNode from './MarkdownNode';
+import MilestoneNode from './MilestoneNode';
 
 const nodeTypes = {
   widgetNode: WidgetNode,
   labelNode: LabelNode,
   rectangleNode: RectangleNode,
   markdownNode: MarkdownNode,
+  milestoneNode: MilestoneNode,
 };
 
 const defaultEdgeOptions = {
@@ -78,7 +80,16 @@ const Canvas: React.FC = () => {
     setNodes(
       Array.from(widgets.values()).map((w) => {
         const isSelected = selectedWidgetId === w._id;
-        const type = w.type === 'label' ? 'labelNode' : w.type === 'rectangle' ? 'rectangleNode' : w.type === 'markdown' ? 'markdownNode' : 'widgetNode';
+        const type =
+          w.type === 'label'
+            ? 'labelNode'
+            : w.type === 'rectangle'
+            ? 'rectangleNode'
+            : w.type === 'markdown'
+            ? 'markdownNode'
+            : w.type === 'milestone'
+            ? 'milestoneNode'
+            : 'widgetNode';
         return {
           id: w._id,
           type,
@@ -86,9 +97,9 @@ const Canvas: React.FC = () => {
           data: w,
           selected: isSelected,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
-          style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown') ? {
-            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : 150),
-            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : 60),
+          style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown' || w.type === 'milestone') ? {
+            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : w.type === 'milestone' ? 320 : 150),
+            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : w.type === 'milestone' ? 240 : 60),
           } : undefined,
         } as FlowNode;
       })
@@ -97,15 +108,32 @@ const Canvas: React.FC = () => {
 
   // Sync edges (Zustand Array) to React Flow edges state
   useEffect(() => {
+    const validEdges = edges.filter((e) => {
+      const sourceWidget = widgets.get(e.source);
+      const targetWidget = widgets.get(e.target);
+      if (!sourceWidget || !targetWidget) return false;
+
+      const sourceIsStatusWidget = !sourceWidget.type || sourceWidget.type === 'widget';
+      const targetIsStatusWidget = !targetWidget.type || targetWidget.type === 'widget';
+      const targetIsMilestone = targetWidget.type === 'milestone';
+
+      // Status widgets can only connect to milestones
+      if (sourceIsStatusWidget && !targetIsMilestone) return false;
+      // Status widgets cannot receive connections
+      if (targetIsStatusWidget) return false;
+
+      return true;
+    });
+
     setEdges(
-      edges.map((e) => ({
+      validEdges.map((e) => ({
         id: e.id,
         source: e.source,
         target: e.target,
         label: e.label,
       })) as FlowEdge[]
     );
-  }, [edges, setEdges]);
+  }, [edges, widgets, setEdges]);
 
   // Handle drag over to enable drop
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -194,6 +222,34 @@ const Canvas: React.FC = () => {
             },
           },
         });
+      } else if (type === 'milestoneNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'milestone',
+            label: 'Goal Milestone',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              width: 320,
+              height: 240,
+            },
+            milestoneItems: [
+              {
+                id: `item_${Math.random().toString(36).substring(2, 11)}`,
+                text: 'Double-click to configure',
+                checked: false,
+              },
+              {
+                id: `item_${Math.random().toString(36).substring(2, 11)}`,
+                text: 'Link status widgets for health tracking',
+                checked: false,
+              },
+            ],
+          },
+        });
       } else {
         send({
           type: 'widget:create',
@@ -233,12 +289,18 @@ const Canvas: React.FC = () => {
       const sourceWidget = widgets.get(connection.source);
       const targetWidget = widgets.get(connection.target);
 
-      // 'widget' type corresponds to Status Widget (default type is also 'widget' if not specified)
-      if (
-        !sourceWidget || sourceWidget.type === 'widget' ||
-        !targetWidget || targetWidget.type === 'widget'
-      ) {
-        console.warn('Status widgets cannot have edge connections');
+      if (!sourceWidget || !targetWidget) return;
+
+      const sourceIsMilestone = sourceWidget.type === 'milestone';
+      const targetIsMilestone = targetWidget.type === 'milestone';
+      const sourceIsStatusWidget = !sourceWidget.type || sourceWidget.type === 'widget';
+      const targetIsStatusWidget = !targetWidget.type || targetWidget.type === 'widget';
+
+      if (sourceIsStatusWidget && targetIsMilestone) {
+        // ✅ allowed — widget feeds into milestone health
+      } else if (sourceIsStatusWidget || targetIsStatusWidget) {
+        // ❌ blocked — status widgets can't connect to non-milestone targets
+        console.warn('Status widgets can only connect to Milestone targets');
         return;
       }
 
