@@ -17,3 +17,32 @@ Before writing or reviewing any backend code, consult the **Rules Checklist** in
 📄 [`wiki/architecture.md#rules-checklist`](./wiki/architecture.md#rules-checklist)
 
 Run every item in that checklist against any new file or pull request that touches `app/packages/backend/src/`.
+
+## Build & Test Guide
+
+All package builds and tests use Bun.
+
+### Working with Packages Individually
+
+You can interact with packages either from the root [app](file:///home/felix/Projects/mission-control/app) directory using workspace filters, or by changing directories.
+
+#### 1. Backend ([app/packages/backend](file:///home/felix/Projects/mission-control/app/packages/backend))
+* **Test**: `bun test --filter @mc/backend` *(or `cd app/packages/backend && bun test`)*
+
+#### 2. Frontend ([app/packages/frontend](file:///home/felix/Projects/mission-control/app/packages/frontend))
+* **Build**: `bun run --filter @mc/frontend build` *(or `cd app/packages/frontend && bun run build`)*
+
+#### 3. Shared ([app/packages/shared](file:///home/felix/Projects/mission-control/app/packages/shared))
+* **Build/Test**: Not required. It exports TypeScript definitions directly from `types.ts`, which are resolved dynamically by Bun workspaces.
+
+---
+
+### Running All Tests
+
+To run all workspace unit tests:
+```bash
+cd app
+bun test
+```
+
+
