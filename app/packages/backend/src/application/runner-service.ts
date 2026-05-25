@@ -1,7 +1,7 @@
 import type { Widget, ExecutionResult, WidgetStatus, ServerMessage } from '@mc/shared';
 import type { IWidgetRepository } from './widget-repository';
 import { write } from 'bun';
-import { unlink } from 'node:fs/promises';
+import { unlink, mkdir, chmod } from 'node:fs/promises';
 
 export class RunnerService {
   constructor(
@@ -31,9 +31,10 @@ export class RunnerService {
     }
 
     // 3. Define temp file paths
+    const tempDir = process.env.RUNNER_TEMP_DIR || '/tmp/mc-sandbox';
     const timestamp = Date.now() + '-' + Math.random().toString(36).substring(2, 8);
-    const userCodePath = `/tmp/mc-${widgetId}-${timestamp}-user.ts`;
-    const harnessPath = `/tmp/mc-${widgetId}-${timestamp}.ts`;
+    const userCodePath = `${tempDir}/mc-${widgetId}-${timestamp}-user.ts`;
+    const harnessPath = `${tempDir}/mc-${widgetId}-${timestamp}.ts`;
 
     const harnessContent = `// auto-generated runner harness
 import { run } from '${userCodePath}';
@@ -55,16 +56,29 @@ process.stdout.write(JSON.stringify(result));
     }, timeoutMs);
 
     try {
+      // Ensure private temp directory exists with strict permissions (readable/writable only by process owner)
+      await mkdir(tempDir, { recursive: true });
+      await chmod(tempDir, 0o700);
+
       // Write the user code and the harness to temp files
       await write(userCodePath, widget.code);
       await write(harnessPath, harnessContent);
 
+      // Clean environment variables to prevent host secrets leakage
+      const cleanEnv: Record<string, string> = {
+        PATH: process.env.PATH || '',
+        __MC_ENV__: JSON.stringify(env),
+      };
+
+      // Construct execution command (allow wrap with sandbox like bwrap or docker)
+      const sandboxCommand = process.env.RUNNER_SANDBOX_COMMAND;
+      const spawnArgs = sandboxCommand
+        ? [...sandboxCommand.trim().split(/\s+/), process.execPath, 'run', harnessPath]
+        : [process.execPath, 'run', harnessPath];
+
       // 4. Spawn the isolated process
-      const proc = Bun.spawn([process.execPath, 'run', harnessPath], {
-        env: {
-          ...process.env,
-          __MC_ENV__: JSON.stringify(env),
-        },
+      const proc = Bun.spawn(spawnArgs, {
+        env: cleanEnv,
         stdout: 'pipe',
         stderr: 'pipe',
         signal: controller.signal,

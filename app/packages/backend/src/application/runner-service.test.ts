@@ -163,4 +163,81 @@ describe('RunnerService', () => {
     expect(notifications.length).toBe(1);
     expect(notifications[0].status).toBe('crash');
   });
+
+  test('Security path: script does not leak host env vars', async () => {
+    // Set a secret key in host process.env
+    process.env.TEST_HOST_SECRET = 'my-secret-key';
+
+    const repo = new MockWidgetRepository();
+    const notifications: ServerMessage[] = [];
+    const notify = (msg: ServerMessage) => {
+      notifications.push(msg);
+    };
+
+    const widget = await repo.create({
+      label: 'Security Check Widget',
+      code: `
+        export async function run(ctx: { env: Record<string, string> }) {
+          return {
+            status: 'ok' as const,
+            message: 'Checked env',
+            output: { secret: process.env.TEST_HOST_SECRET }
+          };
+        }
+      `,
+      envVars: [],
+      timeoutMs: 5000,
+      position: { x: 0, y: 0 }
+    });
+
+    const runner = new RunnerService(repo, notify);
+    await runner.run(widget._id);
+
+    const updatedWidget = await repo.findById(widget._id);
+    expect(updatedWidget).not.toBeNull();
+    expect(updatedWidget!.status).toBe('ok');
+    expect(updatedWidget!.lastResult!.output).toBeDefined();
+    expect((updatedWidget!.lastResult!.output as any).secret).toBeUndefined();
+
+    // Clean up
+    delete process.env.TEST_HOST_SECRET;
+  });
+
+  test('Sandbox path: uses custom sandbox command if specified', async () => {
+    // We can simulate by setting RUNNER_SANDBOX_COMMAND to /usr/bin/env
+    // so it executes "/usr/bin/env <process.execPath> run harnessPath"
+    process.env.RUNNER_SANDBOX_COMMAND = '/usr/bin/env';
+
+    const repo = new MockWidgetRepository();
+    const notifications: ServerMessage[] = [];
+    const notify = (msg: ServerMessage) => {
+      notifications.push(msg);
+    };
+
+    const widget = await repo.create({
+      label: 'Sandbox Widget',
+      code: `
+        export async function run(ctx: { env: Record<string, string> }) {
+          return {
+            status: 'ok' as const,
+            message: 'Ran in sandbox wrapper'
+          };
+        }
+      `,
+      envVars: [],
+      timeoutMs: 5000,
+      position: { x: 0, y: 0 }
+    });
+
+    const runner = new RunnerService(repo, notify);
+    await runner.run(widget._id);
+
+    const updatedWidget = await repo.findById(widget._id);
+    expect(updatedWidget).not.toBeNull();
+    expect(updatedWidget!.status).toBe('ok');
+    expect(updatedWidget!.lastResult!.status).toBe('ok');
+
+    // Clean up
+    delete process.env.RUNNER_SANDBOX_COMMAND;
+  });
 });
