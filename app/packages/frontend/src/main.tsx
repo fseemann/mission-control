@@ -9,11 +9,17 @@ import './styles/index.css';
 
 function App() {
   const connectWebSocket = useWidgetStore((state) => state.connectWebSocket);
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
 
   useEffect(() => {
     connectWebSocket();
   }, [connectWebSocket]);
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   return (
     <div className={`app-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
