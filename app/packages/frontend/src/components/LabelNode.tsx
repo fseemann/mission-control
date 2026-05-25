@@ -29,6 +29,8 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
   const style = element.style || {};
   const fontSize = style.fontSize !== undefined ? `${style.fontSize}px` : '16px';
   const color = style.color || 'var(--text-primary)';
+  const fontWeight = style.bold ? 'bold' : 'normal';
+  const fontFamily = style.cursive ? 'cursive' : 'inherit';
 
   return (
     <div
@@ -36,6 +38,8 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
       style={{
         fontSize,
         color,
+        fontWeight,
+        fontFamily,
       }}
       onDoubleClick={handleDoubleClick}
     >

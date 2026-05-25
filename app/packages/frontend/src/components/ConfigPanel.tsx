@@ -58,6 +58,8 @@ export const ConfigPanel: React.FC = () => {
 
   // Visual style state
   const [fontSize, setFontSize] = useState(16);
+  const [bold, setBold] = useState(false);
+  const [cursive, setCursive] = useState(false);
   const [color, setColor] = useState('#111827');
   const [backgroundColor, setBackgroundColor] = useState('#EEF2F6');
   const [borderColor, setBorderColor] = useState('#D1D5DB');
@@ -86,6 +88,8 @@ export const ConfigPanel: React.FC = () => {
         // Sync style fields
         const style = widget.style || {};
         setFontSize(style.fontSize ?? (widget.type === 'markdown' ? 14 : 16));
+        setBold(!!style.bold);
+        setCursive(!!style.cursive);
         setColor(style.color ?? '#111827');
         setBackgroundColor(style.backgroundColor ?? (widget.type === 'markdown' ? '#FFFFFF' : '#EEF2F6'));
         setBorderColor(style.borderColor ?? (widget.type === 'markdown' ? '#E5E7EB' : '#D1D5DB'));
@@ -134,6 +138,8 @@ export const ConfigPanel: React.FC = () => {
         const stylePayload: any = { ...prevWidget.style };
         if (prevWidget.type === 'label') {
           stylePayload.fontSize = Number(fontSize);
+          stylePayload.bold = bold;
+          stylePayload.cursive = cursive;
           stylePayload.color = color;
           stylePayload.width = Number(width);
           stylePayload.height = Number(height);
@@ -319,6 +325,20 @@ export const ConfigPanel: React.FC = () => {
     }
   };
 
+  const handleBoldChange = (newVal: boolean) => {
+    setBold(newVal);
+    if (isLabel) {
+      triggerReactiveUpdate({}, { bold: newVal });
+    }
+  };
+
+  const handleCursiveChange = (newVal: boolean) => {
+    setCursive(newVal);
+    if (isLabel) {
+      triggerReactiveUpdate({}, { cursive: newVal });
+    }
+  };
+
   const handleBackgroundColorChange = (newVal: string) => {
     setBackgroundColor(newVal);
     if (isRectangle || isMarkdown) {
@@ -467,6 +487,8 @@ export const ConfigPanel: React.FC = () => {
     };
     if (isLabel) {
       stylePayload.fontSize = Number(fontSize);
+      stylePayload.bold = bold;
+      stylePayload.cursive = cursive;
       stylePayload.color = color;
       stylePayload.width = Number(width);
       stylePayload.height = Number(height);
@@ -836,15 +858,55 @@ export const ConfigPanel: React.FC = () => {
                   value={fontSize}
                   onChange={(e) => handleFontSizeChange(Number(e.target.value))}
                 >
-                  <option value={12}>12 (Small)</option>
-                  <option value={14}>14 (Regular)</option>
-                  <option value={16}>16 (Medium)</option>
-                  <option value={20}>20 (Large)</option>
-                  <option value={24}>24 (Extra Large)</option>
-                  <option value={32}>32 (Title)</option>
-                  <option value={40}>40 (Display)</option>
+                  <option value={8}>8 px</option>
+                  <option value={9}>9 px</option>
+                  <option value={10}>10 px</option>
+                  <option value={11}>11 px</option>
+                  <option value={12}>12 px (Small)</option>
+                  <option value={13}>13 px</option>
+                  <option value={14}>14 px (Regular)</option>
+                  <option value={15}>15 px</option>
+                  <option value={16}>16 px (Medium)</option>
+                  <option value={18}>18 px</option>
+                  <option value={20}>20 px (Large)</option>
+                  <option value={22}>22 px</option>
+                  <option value={24}>24 px (Extra Large)</option>
+                  <option value={28}>28 px</option>
+                  <option value={32}>32 px (Title)</option>
+                  <option value={36}>36 px</option>
+                  <option value={40}>40 px (Display)</option>
+                  <option value={48}>48 px</option>
+                  <option value={56}>56 px</option>
+                  <option value={64}>64 px</option>
+                  <option value={72}>72 px</option>
+                  <option value={80}>80 px</option>
+                  <option value={96}>96 px</option>
                 </select>
               </div>
+
+              {/* Bold & Cursive toggles (for LabelNode) */}
+              {isLabel && (
+                <div style={{ display: 'flex', gap: '16px', marginTop: '-8px', marginBottom: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>
+                    <input
+                      type="checkbox"
+                      checked={bold}
+                      onChange={(e) => handleBoldChange(e.target.checked)}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                    />
+                    Bold
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>
+                    <input
+                      type="checkbox"
+                      checked={cursive}
+                      onChange={(e) => handleCursiveChange(e.target.checked)}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                    />
+                    Cursive
+                  </label>
+                </div>
+              )}
 
               {/* Text Color Picker / Presets */}
               <div className="form-group">

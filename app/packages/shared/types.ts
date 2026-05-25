@@ -50,6 +50,8 @@ export interface ElementStyle {
   borderRadius?: number;
   fontSize?: number;
   zIndex?: number;
+  bold?: boolean;
+  cursive?: boolean;
 }
 
 export interface Widget {
