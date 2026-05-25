@@ -56,6 +56,7 @@ export const ConfigPanel: React.FC = () => {
   const [code, setCode] = useState('');
   const [envVars, setEnvVars] = useState<EnvVar[]>([]);
   const [milestoneItems, setMilestoneItems] = useState<MilestoneItem[]>([]);
+  const [locked, setLocked] = useState(false);
 
   // Visual style state
   const [fontSize, setFontSize] = useState(16);
@@ -85,6 +86,7 @@ export const ConfigPanel: React.FC = () => {
         setCode(widget.code || DEFAULT_CODE_TEMPLATE);
         setEnvVars(widget.envVars ? JSON.parse(JSON.stringify(widget.envVars)) : []);
         setMilestoneItems(widget.milestoneItems ? JSON.parse(JSON.stringify(widget.milestoneItems)) : []);
+        setLocked(!!widget.locked);
         
         // Sync style fields
         const style = widget.style || {};
@@ -256,6 +258,8 @@ export const ConfigPanel: React.FC = () => {
     );
   }
 
+  if (!widget) return null;
+
   const isWidget = !widget.type || widget.type === 'widget';
   const isLabel = widget.type === 'label';
   const isRectangle = widget.type === 'rectangle';
@@ -310,6 +314,11 @@ export const ConfigPanel: React.FC = () => {
     if (isLabel || isRectangle || isMarkdown) {
       triggerReactiveUpdate({ label: newVal });
     }
+  };
+
+  const handleLockedChange = (newVal: boolean) => {
+    setLocked(newVal);
+    triggerReactiveUpdate({ locked: newVal });
   };
 
   const handleFontSizeChange = (newVal: number) => {
@@ -487,6 +496,7 @@ export const ConfigPanel: React.FC = () => {
 
     let updatePayload: any = {
       label,
+      locked,
     };
 
     if (isWidget) {
@@ -573,6 +583,19 @@ export const ConfigPanel: React.FC = () => {
                 required={!isRectangle}
               />
             )}
+          </div>
+
+          {/* Lock Canvas Element */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '-4px', justifyContent: 'flex-start' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 'normal', width: '100%', justifyContent: 'flex-start' }}>
+              <input
+                type="checkbox"
+                checked={locked}
+                onChange={(e) => handleLockedChange(e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
+              />
+              <span>🔒 Lock</span>
+            </label>
           </div>
 
           {/* Milestone checklist editor */}

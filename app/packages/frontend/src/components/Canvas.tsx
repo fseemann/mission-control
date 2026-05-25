@@ -108,6 +108,7 @@ const Canvas: React.FC = () => {
           data: w,
           selected: isSelected,
           dragging: existing?.dragging,
+          draggable: !w.locked,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
           style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown' || w.type === 'milestone') ? {
             width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : w.type === 'milestone' ? 320 : 150),
@@ -362,7 +363,6 @@ const Canvas: React.FC = () => {
 
       if (!sourceWidget || !targetWidget) return;
 
-      const sourceIsMilestone = sourceWidget.type === 'milestone';
       const targetIsMilestone = targetWidget.type === 'milestone';
       const sourceIsStatusWidget = !sourceWidget.type || sourceWidget.type === 'widget';
       const targetIsStatusWidget = !targetWidget.type || targetWidget.type === 'widget';

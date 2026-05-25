@@ -69,13 +69,18 @@ export const MarkdownNode: React.FC<NodeProps<Widget>> = ({ id, data: element, s
         color="var(--accent)"
         minWidth={100}
         minHeight={60}
-        isVisible={selected}
+        isVisible={selected && !element.locked}
         onResizeEnd={onResizeEnd}
       />
       <div
         className="markdown-node-content"
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
+      {element.locked && (
+        <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '12px', zIndex: 10, background: 'rgba(255,255,255,0.8)', padding: '2px 4px', borderRadius: '4px' }} title="Locked">
+          🔒
+        </div>
+      )}
     </div>
   );
 };

@@ -49,12 +49,17 @@ export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         color="var(--accent)"
         minWidth={50}
         minHeight={50}
-        isVisible={selected}
+        isVisible={selected && !element.locked}
         onResizeEnd={onResizeEnd}
       />
       {element.label && (
         <div className="rectangle-node-label">
           {element.label}
+        </div>
+      )}
+      {element.locked && (
+        <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '12px', zIndex: 10 }} title="Locked">
+          🔒
         </div>
       )}
     </div>

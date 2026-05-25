@@ -79,6 +79,7 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
         <h4 className="widget-node-title" title={widget.label}>
           {widget.label || 'Status'}
         </h4>
+        {widget.locked && <span style={{ marginLeft: 'auto', fontSize: '12px' }} title="Element is locked">🔒</span>}
       </div>
 
       <div className="widget-node-meta" style={{ flexDirection: 'column', gap: '4px' }}>

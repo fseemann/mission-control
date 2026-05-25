@@ -47,11 +47,12 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
         color="var(--accent)"
         minWidth={50}
         minHeight={30}
-        isVisible={selected}
+        isVisible={selected && !element.locked}
         onResizeEnd={onResizeEnd}
       />
       <div>
         {element.label || 'Double-click to edit text'}
+        {element.locked && <span style={{ fontSize: '11px', marginLeft: '6px', opacity: 0.7 }} title="Locked">🔒</span>}
       </div>
     </div>
   );

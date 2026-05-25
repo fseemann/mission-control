@@ -68,6 +68,7 @@ export interface Widget {
   lastResult?: ExecutionResult;
   updatedAt: string;
   milestoneItems?: MilestoneItem[]; // only populated when type === 'milestone'
+  locked?: boolean;
 }
 
 export interface ExecutionResult {
@@ -89,8 +90,8 @@ export interface ExecutionResult {
 export type ClientMessage =
   // Widgets
   | { type: 'widget:list' }
-  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems'> & { cronExpression?: string } }
-  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems'>> }
+  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked'> & { cronExpression?: string } }
+  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked'>> }
   | { type: 'widget:delete'; id: string }
   | { type: 'widget:run';    id: string }
   // Edges

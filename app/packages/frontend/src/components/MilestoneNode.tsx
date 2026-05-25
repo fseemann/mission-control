@@ -120,7 +120,7 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         color="var(--accent)"
         minWidth={280}
         minHeight={200}
-        isVisible={selected}
+        isVisible={selected && !element.locked}
         onResizeEnd={onResizeEnd}
       />
 
@@ -135,6 +135,7 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         <h4 className="milestone-node-title" title={element.label}>
           {element.label || 'Goal Milestone'}
         </h4>
+        {element.locked && <span style={{ marginRight: '6px', fontSize: '12px' }} title="Locked">🔒</span>}
         {renderHealthBadge()}
       </div>
 
