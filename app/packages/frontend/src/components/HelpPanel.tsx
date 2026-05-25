@@ -122,13 +122,68 @@ export async function run({ env }: { env: Record<string, string> }) {
   });
 }`;
 
+const MTLS_EXAMPLE_CODE = `/**
+ * Example 3: mTLS Secured GET Request (Base64)
+ * Uses Bun's native fetch API to perform a GET request secured with mutual TLS.
+ * Decodes PEM-formatted key, cert, and CA from base64 environment variables
+ * to avoid newline formatting issues in single-line input fields.
+ */
+export async function run({ env }: { env: Record<string, string> }) {
+  const url = env.SECURE_URL || 'https://secure.example.com/status';
+  const { CLIENT_KEY_B64, CLIENT_CERT_B64, CA_CERT_B64 } = env;
+
+  if (!CLIENT_KEY_B64 || !CLIENT_CERT_B64) {
+    return {
+      status: 'fail' as const,
+      message: 'Missing CLIENT_KEY_B64 or CLIENT_CERT_B64 in env'
+    };
+  }
+
+  try {
+    // Decode certificates from base64 strings
+    const key = Buffer.from(CLIENT_KEY_B64, 'base64').toString('utf8');
+    const cert = Buffer.from(CLIENT_CERT_B64, 'base64').toString('utf8');
+    const ca = CA_CERT_B64 ? Buffer.from(CA_CERT_B64, 'base64').toString('utf8') : undefined;
+
+    const res = await fetch(url, {
+      method: 'GET',
+      tls: {
+        key,
+        cert,
+        ca,
+        // rejectUnauthorized: false // Uncomment for self-signed certs in development
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        status: 'ok' as const,
+        message: \`mTLS Connection successful. Status: \${res.status}\`,
+        output: data
+      };
+    } else {
+      return {
+        status: 'degraded' as const,
+        message: \`mTLS request failed with status: \${res.status} \${res.statusText}\`
+      };
+    }
+  } catch (err: any) {
+    return {
+      status: 'fail' as const,
+      message: \`mTLS Connection Error: \${err.message}\`
+    };
+  }
+}`;
+
+
 export const HelpPanel: React.FC = () => {
   const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
   const helpTab = useWidgetStore((state) => state.helpTab);
   const setHelpOpen = useWidgetStore((state) => state.setHelpOpen);
-  const [copiedType, setCopiedType] = useState<'fetch' | 'tls' | null>(null);
+  const [copiedType, setCopiedType] = useState<'fetch' | 'tls' | 'mtls' | null>(null);
 
-  const handleCopy = (code: string, type: 'fetch' | 'tls') => {
+  const handleCopy = (code: string, type: 'fetch' | 'tls' | 'mtls') => {
     navigator.clipboard.writeText(code).then(() => {
       setCopiedType(type);
       setTimeout(() => setCopiedType(null), 2000);
@@ -250,6 +305,26 @@ export const HelpPanel: React.FC = () => {
               <div className="code-container">
                 <pre className="example-code-pre">
                   <code>{TLS_EXAMPLE_CODE}</code>
+                </pre>
+              </div>
+            </section>
+
+            <section className="help-section">
+              <div className="example-header">
+                <h4>Example 3: mTLS Secured GET Request (Base64)</h4>
+                <button 
+                  className={`copy-btn ${copiedType === 'mtls' ? 'copied' : ''}`}
+                  onClick={() => handleCopy(MTLS_EXAMPLE_CODE, 'mtls')}
+                >
+                  {copiedType === 'mtls' ? '✅ Copied!' : '📋 Copy Code'}
+                </button>
+              </div>
+              <p className="example-description">
+                Sends a GET request using Bun's native <code>fetch</code> TLS options. Decodes client certificates from base64 environment variables to bypass newline entry restrictions in the UI.
+              </p>
+              <div className="code-container">
+                <pre className="example-code-pre">
+                  <code>{MTLS_EXAMPLE_CODE}</code>
                 </pre>
               </div>
             </section>
