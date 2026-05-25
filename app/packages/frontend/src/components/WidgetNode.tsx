@@ -2,6 +2,7 @@ import React from 'react';
 import { NodeProps, Handle, Position } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { humanizeCron } from '../utils/cron';
 
 export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -80,10 +81,16 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
         </h4>
       </div>
 
-      <div className="widget-node-meta">
+      <div className="widget-node-meta" style={{ flexDirection: 'column', gap: '4px' }}>
         <span>{lastRunText}</span>
         {widget.cronExpression && (
-          <span title={`Schedule: ${widget.cronExpression}`}>⏱️</span>
+          <span 
+            className="widget-cron-badge" 
+            title={humanizeCron(widget.cronExpression)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}
+          >
+            ⏱️ {humanizeCron(widget.cronExpression)}
+          </span>
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { EnvVar, Widget, MilestoneItem } from '@mc/shared';
+import { humanizeCron } from '../utils/cron';
 
 const DEFAULT_CODE_TEMPLATE = `// Write your health check script here.
 // Must export an async run({ env }) function that returns:
@@ -385,35 +386,6 @@ export const ConfigPanel: React.FC = () => {
   const maxZ = Math.max(...allZIndexes, 1);
   const minZ = Math.min(...allZIndexes, 0);
   const currentZ = widget.style?.zIndex ?? (widget.type === 'rectangle' ? 0 : 1);
-
-  // Simple humanizer for Cron expression
-  const humanizeCron = (cron: string): string => {
-    if (!cron.trim()) return 'Manual run only';
-    const parts = cron.trim().split(/\s+/);
-    if (parts.length !== 5) {
-      return 'Invalid: must have exactly 5 fields (min hour day month day-of-week)';
-    }
-    const [min, hour, day, month, dayOfWeek] = parts;
-
-    if (min === '*' && hour === '*' && day === '*' && month === '*' && dayOfWeek === '*') {
-      return 'Runs every minute';
-    }
-    if (min.startsWith('*/') && hour === '*' && day === '*' && month === '*' && dayOfWeek === '*') {
-      const m = min.slice(2);
-      return `Runs every ${m} minutes`;
-    }
-    if (min === '0' && hour === '*' && day === '*' && month === '*' && dayOfWeek === '*') {
-      return 'Runs every hour at minute 0';
-    }
-    if (min === '0' && hour.startsWith('*/') && day === '*' && month === '*' && dayOfWeek === '*') {
-      const h = hour.slice(2);
-      return `Runs every ${h} hours at minute 0`;
-    }
-    if (min === '0' && hour === '0' && day === '*' && month === '*' && dayOfWeek === '*') {
-      return 'Runs daily at midnight';
-    }
-    return `Custom cron expression: ${cron}`;
-  };
 
   const handleAddEnvRow = () => {
     setEnvVars([...envVars, { key: '', value: '', isSecret: true }]);
