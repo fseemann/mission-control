@@ -458,6 +458,7 @@ const Canvas: React.FC = () => {
         fitView={!initialViewport}
         onMoveEnd={onMoveEnd}
         minZoom={0.1}
+        selectNodesOnDrag={false}
       >
         <Background variant={BackgroundVariant.Dots} color="#D1D5DB" gap={16} size={1} />
         <Controls position="top-right" />
