@@ -48,11 +48,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               className="draggable-widget"
               draggable
               onDragStart={(e) => onDragStart(e, 'widgetNode')}
-              title="Drag onto canvas to create a new status widget"
+              title="Drag onto canvas to create a new status"
             >
               <span className="widget-icon">🟢</span>
               <div>
-                <strong>Status Widget</strong>
+                <strong>Status</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Runs health-check script
                 </div>

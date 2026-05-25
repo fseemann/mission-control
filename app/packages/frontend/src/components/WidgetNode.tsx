@@ -76,7 +76,7 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
           title={`Status: ${status}`}
         />
         <h4 className="widget-node-title" title={widget.label}>
-          {widget.label || 'Unnamed Widget'}
+          {widget.label || 'Status'}
         </h4>
       </div>
 

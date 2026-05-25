@@ -275,7 +275,7 @@ const Canvas: React.FC = () => {
           type: 'widget:create',
           payload: {
             type: 'widget',
-            label: 'Status Widget',
+            label: 'Status',
             code: '', // Default script generated on server/save
             envVars: [],
             timeoutMs: 10000,
