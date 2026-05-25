@@ -139,7 +139,11 @@ export const HelpPanel: React.FC = () => {
     <div className={`help-panel ${isHelpOpen ? 'open' : ''}`}>
       <div className="help-header">
         <h3 className="help-title">
-          {helpTab === 'scripting' ? '🛰️ Scripting Guide' : '🔗 Edge Connections'}
+          {helpTab === 'scripting'
+            ? '🛰️ Scripting Guide'
+            : helpTab === 'edges'
+            ? '🔗 Edge Connections'
+            : '🎨 Canvas Guide'}
         </h3>
         <button className="close-btn" onClick={() => setHelpOpen(false)} title="Close Panel">
           &times;
@@ -161,10 +165,17 @@ export const HelpPanel: React.FC = () => {
         >
           🔗 Edges
         </button>
+        <button
+          type="button"
+          className={`help-tab-btn ${helpTab === 'canvas' ? 'active' : ''}`}
+          onClick={() => setHelpOpen(true, 'canvas')}
+        >
+          🎨 Canvas
+        </button>
       </div>
 
       <div className="help-body">
-        {helpTab === 'scripting' ? (
+        {helpTab === 'scripting' && (
           <>
             <section className="help-section">
               <h4>Overview</h4>
@@ -243,7 +254,9 @@ export const HelpPanel: React.FC = () => {
               </div>
             </section>
           </>
-        ) : (
+        )}
+
+        {helpTab === 'edges' && (
           <>
             <section className="help-section">
               <h4>Overview</h4>
@@ -302,6 +315,70 @@ export const HelpPanel: React.FC = () => {
               <p style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                 The connection will be removed immediately, and the server will re-evaluate the target Milestone's overall health status based on its remaining active connections.
               </p>
+            </section>
+          </>
+        )}
+
+        {helpTab === 'canvas' && (
+          <>
+            <section className="help-section">
+              <h4>Overview</h4>
+              <p>
+                The canvas is a dynamic, grid-aligned visual workspace powered by <strong>React Flow</strong>.
+                You can drag, drop, position, resize, select, and connect elements to build and document your status dashboards.
+              </p>
+            </section>
+
+            <section className="help-section">
+              <h4>Navigation</h4>
+              <div className="help-steps">
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Pan / Scroll:</strong> Click and drag on any empty space of the grid to move around the workspace.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Zoom:</strong> Scroll your mouse wheel or pinch/swipe on your trackpad. You can also use the control buttons in the top-right corner (+ / -).
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Mini-map:</strong> Use the interactive overview panel in the bottom-right corner to see a global layout of your canvas and jump around.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="help-section">
+              <h4>Managing Elements</h4>
+              <div className="help-steps">
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Adding Nodes:</strong> Drag widgets or visual elements from the Sidebar on the left and drop them onto the grid.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Configuring:</strong> Click any node to select it and open its configuration panel on the right. Double-click to focus editing fields.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Resizing:</strong> Visual elements (Rectangle, Markdown, Milestone) can be resized by dragging the handle in their bottom-right corner.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Multi-Select:</strong> Hold the <span className="keyboard-key">Shift</span> key while clicking and dragging to draw a selection box around multiple nodes.
+                  </div>
+                </div>
+                <div className="help-step-item">
+                  <div className="help-step-content">
+                    <strong>Deletion:</strong> Click to select a node or edge (or select multiple), then press the <span className="keyboard-key">Backspace</span> or <span className="keyboard-key">Delete</span> key.
+                  </div>
+                </div>
+              </div>
             </section>
           </>
         )}

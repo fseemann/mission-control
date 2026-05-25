@@ -142,6 +142,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               <span>🔗</span>
               <span>Edge Connections</span>
             </button>
+            <button
+              type="button"
+              className="sidebar-help-btn"
+              onClick={() => {
+                if (isHelpOpen && helpTab === 'canvas') {
+                  setHelpOpen(false);
+                } else {
+                  setHelpOpen(true, 'canvas');
+                }
+              }}
+              title="Toggle canvas controls, navigation, and shortcuts guide"
+              style={{ marginTop: 0 }}
+            >
+              <span>🎨</span>
+              <span>Canvas Guide</span>
+            </button>
           </div>
         </div>
       </div>

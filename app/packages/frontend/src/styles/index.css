@@ -993,22 +993,23 @@ body, html, #root {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
-  background: var(--accent-light);
-  border: 1px solid var(--accent);
+  padding: 8px 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
   border-radius: 8px;
-  color: var(--accent);
+  color: var(--text-secondary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
   margin-top: 10px;
 }
 
 .sidebar-help-btn:hover {
-  background: var(--accent);
-  color: #FFFFFF;
-  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.15);
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 2px 4px -1px rgba(99, 102, 241, 0.08);
   transform: translateY(-1px);
 }
 
