@@ -508,6 +508,13 @@ const Canvas: React.FC = () => {
   selectedUseCaseNodes.forEach((node) => {
     const edgeIds = node.data?.useCaseEdges || [];
     edgeIds.forEach((id: string) => highlightedEdgeIds.add(id));
+
+    // Always highlight the path from the use case node to the connected diagram nodes
+    edges.forEach((edge) => {
+      if (edge.source === node.id || edge.target === node.id) {
+        highlightedEdgeIds.add(edge.id);
+      }
+    });
   });
 
   const selectedEdgeId = useWidgetStore((state) => state.selectedEdgeId);

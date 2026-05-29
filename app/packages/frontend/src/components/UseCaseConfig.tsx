@@ -29,6 +29,61 @@ export const UseCaseConfig: React.FC<UseCaseConfigProps> = ({
   const edges = useWidgetStore((state) => state.edges || []);
   const widgets = useWidgetStore((state) => state.widgets);
 
+  // Find all nodes directly connected to this Use Case node
+  const directlyConnectedNodeIds = new Set<string>();
+  edges.forEach((edge) => {
+    if (edge.source === widget._id) directlyConnectedNodeIds.add(edge.target);
+    if (edge.target === widget._id) directlyConnectedNodeIds.add(edge.source);
+  });
+
+  // Perform BFS to find the entire connected graph component and compute distances
+  const connectedNodeIds = new Set<string>(directlyConnectedNodeIds);
+  const queue = Array.from(directlyConnectedNodeIds);
+  const visited = new Set<string>();
+  const distances: Record<string, number> = {};
+
+  directlyConnectedNodeIds.forEach((id) => {
+    distances[id] = 1;
+  });
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    edges.forEach((edge) => {
+      // Exclude edges directly connected to the Use Case node itself
+      if (edge.source === widget._id || edge.target === widget._id) return;
+
+      if (edge.source === current && !visited.has(edge.target)) {
+        connectedNodeIds.add(edge.target);
+        if (distances[edge.target] === undefined) {
+          distances[edge.target] = distances[current] + 1;
+        }
+        queue.push(edge.target);
+      }
+      if (edge.target === current && !visited.has(edge.source)) {
+        connectedNodeIds.add(edge.source);
+        if (distances[edge.source] === undefined) {
+          distances[edge.source] = distances[current] + 1;
+        }
+        queue.push(edge.source);
+      }
+    });
+  }
+
+  // Only show edges that connect nodes within this connected component, sorted by distance
+  const filteredEdges = edges
+    .filter((edge) => {
+      if (edge.source === widget._id || edge.target === widget._id) return false;
+      return connectedNodeIds.has(edge.source) && connectedNodeIds.has(edge.target);
+    })
+    .sort((a, b) => {
+      const distA = Math.min(distances[a.source] ?? Infinity, distances[a.target] ?? Infinity);
+      const distB = Math.min(distances[b.source] ?? Infinity, distances[b.target] ?? Infinity);
+      return distA - distB;
+    });
+
   const [label, setLabel] = useState('');
   const [locked, setLocked] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState('#FAF5FF');
@@ -270,9 +325,10 @@ export const UseCaseConfig: React.FC<UseCaseConfigProps> = ({
         </div>
       </div>
 
+      {/* Highlighted Connections List */}
       <div className="form-group">
         <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Link2 size={14} /> Highlighted Paths ({useCaseEdges.length})
+          <Link2 size={14} /> Highlighted Paths ({filteredEdges.filter(fe => useCaseEdges.includes(fe.id)).length})
         </label>
         <div 
           className="use-case-edges-list"
@@ -288,12 +344,12 @@ export const UseCaseConfig: React.FC<UseCaseConfigProps> = ({
             gap: '8px'
           }}
         >
-          {edges.length === 0 ? (
+          {filteredEdges.length === 0 ? (
             <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center', padding: '12px 0' }}>
-              No connections found on canvas
+              No connections between linked nodes found
             </span>
           ) : (
-            edges.map((edge) => {
+            filteredEdges.map((edge) => {
               const isChecked = useCaseEdges.includes(edge.id);
               const edgeLabel = `${getWidgetName(edge.source)} ➔ ${getWidgetName(edge.target)}${edge.label ? ` (${edge.label})` : ''}`;
               
