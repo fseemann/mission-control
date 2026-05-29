@@ -66,13 +66,18 @@ export const ArchitectureNode: React.FC<NodeProps<Widget>> = ({ id, data: elemen
         onResizeEnd={onResizeEnd}
       />
       
-      {/* Target handles (incoming connections) */}
-      <Handle type="target" position={Position.Left} id="l_in" style={{ background: '#6366F1', width: '8px', height: '8px' }} />
-      <Handle type="target" position={Position.Top} id="t_in" style={{ background: '#6366F1', width: '8px', height: '8px' }} />
+      {/* Bidirectional handles (overlapping target and source) */}
+      <Handle type="target" position={Position.Left} id="l_in" style={{ background: '#6366F1', width: '8px', height: '8px', zIndex: 10 }} />
+      <Handle type="source" position={Position.Left} id="l_out" style={{ background: '#818CF8', width: '8px', height: '8px', zIndex: 9 }} />
       
-      {/* Source handles (outgoing connections) */}
-      <Handle type="source" position={Position.Right} id="r_out" style={{ background: '#818CF8', width: '8px', height: '8px' }} />
-      <Handle type="source" position={Position.Bottom} id="b_out" style={{ background: '#818CF8', width: '8px', height: '8px' }} />
+      <Handle type="target" position={Position.Top} id="t_in" style={{ background: '#6366F1', width: '8px', height: '8px', zIndex: 10 }} />
+      <Handle type="source" position={Position.Top} id="t_out" style={{ background: '#818CF8', width: '8px', height: '8px', zIndex: 9 }} />
+      
+      <Handle type="target" position={Position.Right} id="r_in" style={{ background: '#6366F1', width: '8px', height: '8px', zIndex: 10 }} />
+      <Handle type="source" position={Position.Right} id="r_out" style={{ background: '#818CF8', width: '8px', height: '8px', zIndex: 9 }} />
+      
+      <Handle type="target" position={Position.Bottom} id="b_in" style={{ background: '#6366F1', width: '8px', height: '8px', zIndex: 10 }} />
+      <Handle type="source" position={Position.Bottom} id="b_out" style={{ background: '#818CF8', width: '8px', height: '8px', zIndex: 9 }} />
 
       <div style={{ wordBreak: 'break-word', userSelect: 'none' }}>
         {element.label || 'System Component'}
