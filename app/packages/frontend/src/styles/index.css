@@ -1493,3 +1493,27 @@ body, html, #root {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* Architecture Node styling */
+.architecture-node {
+  box-sizing: border-box;
+  transition: box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  background-color: #FFFFFF;
+}
+
+.architecture-node.selected {
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent) !important;
+}
+
+/* Use Case Node styling */
+.usecase-node-card {
+  box-sizing: border-box;
+  transition: box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  background-color: #FAF5FF;
+}
+
+.usecase-node-card.selected {
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.4);
+  border-color: #A855F7 !important;
+}

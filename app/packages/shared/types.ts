@@ -36,9 +36,12 @@ export interface Edge {
   source: string;   // widget _id
   target: string;   // widget _id
   label?: string;
+  undirected?: boolean;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
 }
 
-export type ElementType = 'widget' | 'label' | 'rectangle' | 'markdown' | 'milestone';
+export type ElementType = 'widget' | 'label' | 'rectangle' | 'markdown' | 'milestone' | 'architecture' | 'usecase';
 
 export interface ElementStyle {
   width?: number;
@@ -69,6 +72,7 @@ export interface Widget {
   updatedAt: string;
   milestoneItems?: MilestoneItem[]; // only populated when type === 'milestone'
   locked?: boolean;
+  useCaseEdges?: string[]; // only populated when type === 'usecase'
 }
 
 export interface ExecutionResult {
@@ -90,14 +94,15 @@ export interface ExecutionResult {
 export type ClientMessage =
   // Widgets
   | { type: 'widget:list' }
-  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked'> & { cronExpression?: string } }
-  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked'>> }
+  | { type: 'widget:create'; payload: Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked' | 'useCaseEdges'> & { cronExpression?: string } }
+  | { type: 'widget:update'; id: string; payload: Partial<Pick<Widget, 'type' | 'label' | 'code' | 'envVars' | 'cronExpression' | 'timeoutMs' | 'position' | 'style' | 'milestoneItems' | 'locked' | 'useCaseEdges'>> }
   | { type: 'widget:delete'; id: string }
   | { type: 'widget:run';    id: string }
   // Edges
   | { type: 'edge:list' }
   | { type: 'edge:create'; payload: Edge }
-  | { type: 'edge:delete'; id: string };
+  | { type: 'edge:delete'; id: string }
+  | { type: 'edge:update'; id: string; payload: Partial<Pick<Edge, 'label' | 'undirected'>> };
 
 /** Messages sent from the SERVER to the CLIENT. */
 export type ServerMessage =
@@ -109,6 +114,7 @@ export type ServerMessage =
   | { type: 'widget:updated'; widget: Widget }
   | { type: 'widget:deleted'; id: string }
   | { type: 'edge:created';   edge: Edge }
+  | { type: 'edge:updated';   edge: Edge }
   | { type: 'edge:deleted';   id: string }
   // Runner events (broadcast)
   | { type: 'widget:result';  widgetId: string; result: ExecutionResult; status: WidgetStatus }

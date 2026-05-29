@@ -7,11 +7,17 @@ import RectangleConfig from './RectangleConfig';
 import MarkdownConfig from './MarkdownConfig';
 import MilestoneConfig from './MilestoneConfig';
 import ScriptConfig from './ScriptConfig';
+import ArchitectureConfig from './ArchitectureConfig';
+import UseCaseConfig from './UseCaseConfig';
+import EdgeConfig from './EdgeConfig';
 
 export const ConfigPanel: React.FC = () => {
   const selectedWidgetIds = useWidgetStore((state) => state.selectedWidgetIds || []);
+  const selectedEdgeId = useWidgetStore((state) => state.selectedEdgeId);
   const widgets = useWidgetStore((state) => state.widgets);
+  const edges = useWidgetStore((state) => state.edges || []);
   const selectWidget = useWidgetStore((state) => state.selectWidget);
+  const selectEdge = useWidgetStore((state) => state.selectEdge);
   const send = useWidgetStore((state) => state.send);
   const isHelpOpen = useWidgetStore((state) => state.isHelpOpen);
   const helpTab = useWidgetStore((state) => state.helpTab);
@@ -32,10 +38,34 @@ export const ConfigPanel: React.FC = () => {
     };
   }, []);
 
-  if (selectedWidgetIds.length === 0) {
+  if (selectedWidgetIds.length === 0 && !selectedEdgeId) {
     return (
       <div className="config-panel">
         {/* Render empty or closed config panel */}
+      </div>
+    );
+  }
+
+  if (selectedEdgeId) {
+    const edge = edges.find((e) => e.id === selectedEdgeId);
+    if (!edge) return null;
+
+    return (
+      <div className={`config-panel open`}>
+        <div className="config-header">
+          <h3 className="config-title">Configure Connection</h3>
+          <button className="close-btn" onClick={() => selectEdge(null)} title="Close Panel">
+            &times;
+          </button>
+        </div>
+        <div className="config-body">
+          <EdgeConfig
+            edge={edge}
+            send={send}
+            selectEdge={selectEdge}
+            widgets={widgets}
+          />
+        </div>
       </div>
     );
   }
@@ -58,6 +88,8 @@ export const ConfigPanel: React.FC = () => {
   const isRectangle = widget.type === 'rectangle';
   const isMarkdown = widget.type === 'markdown';
   const isMilestone = widget.type === 'milestone';
+  const isArchitecture = widget.type === 'architecture';
+  const isUseCase = widget.type === 'usecase';
 
   // General reactive update helper
   const triggerReactiveUpdate = (updatedFields: Partial<Widget>, updatedStyle?: any) => {
@@ -126,6 +158,10 @@ export const ConfigPanel: React.FC = () => {
       ? 'markdown'
       : isMilestone
       ? 'milestone'
+      : isArchitecture
+      ? 'architecture component'
+      : isUseCase
+      ? 'use case'
       : 'widget';
     if (confirm(`Are you sure you want to delete this ${itemType}?`)) {
       send({ type: 'widget:delete', id: widget._id });
@@ -154,6 +190,10 @@ export const ConfigPanel: React.FC = () => {
             ? 'Markdown'
             : isMilestone
             ? 'Milestone'
+            : isArchitecture
+            ? 'Component'
+            : isUseCase
+            ? 'Use Case'
             : 'Widget'}
         </h3>
         <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
@@ -203,6 +243,32 @@ export const ConfigPanel: React.FC = () => {
         )}
         {isMilestone && (
           <MilestoneConfig
+            widget={widget}
+            send={send}
+            selectWidget={selectWidget}
+            triggerReactiveUpdate={triggerReactiveUpdate}
+            maxZ={maxZ}
+            minZ={minZ}
+            currentZ={currentZ}
+            handleSave={handleSave}
+            handleDeleteWidget={handleDeleteWidget}
+          />
+        )}
+        {isArchitecture && (
+          <ArchitectureConfig
+            widget={widget}
+            send={send}
+            selectWidget={selectWidget}
+            triggerReactiveUpdate={triggerReactiveUpdate}
+            maxZ={maxZ}
+            minZ={minZ}
+            currentZ={currentZ}
+            handleSave={handleSave}
+            handleDeleteWidget={handleDeleteWidget}
+          />
+        )}
+        {isUseCase && (
+          <UseCaseConfig
             widget={widget}
             send={send}
             selectWidget={selectWidget}

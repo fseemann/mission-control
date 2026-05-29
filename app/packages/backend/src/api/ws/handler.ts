@@ -114,6 +114,11 @@ export class WsHandler {
           this.broadcast({ type: 'edge:deleted', id: msg.id } satisfies ServerMessage);
           break;
         }
+        case 'edge:update': {
+          const edge = await this.edgeRepo.update(msg.id, msg.payload);
+          this.broadcast({ type: 'edge:updated', edge } satisfies ServerMessage);
+          break;
+        }
         default: {
           const _exhaustive: never = msg;
           throw new Error(`Unhandled message type: ${(msg as any).type}`);

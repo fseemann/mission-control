@@ -55,6 +55,13 @@ class MockEdgeRepository implements IEdgeRepository {
     return edge;
   }
 
+  async update(id: string, payload: Partial<Pick<Edge, 'label' | 'undirected'>>): Promise<Edge> {
+    const idx = this.edges.findIndex(e => e.id === id);
+    if (idx === -1) throw new Error(`Edge ${id} not found`);
+    this.edges[idx] = { ...this.edges[idx], ...payload };
+    return this.edges[idx];
+  }
+
   async delete(id: string): Promise<void> {
     this.edges = this.edges.filter(e => e.id !== id);
   }

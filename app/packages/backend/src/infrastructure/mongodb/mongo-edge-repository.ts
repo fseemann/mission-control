@@ -13,13 +13,33 @@ export class MongoEdgeRepository implements IEdgeRepository {
       id: doc.id,
       source: doc.source,
       target: doc.target,
-      label: doc.label
+      label: doc.label,
+      undirected: doc.undirected,
+      sourceHandle: doc.sourceHandle,
+      targetHandle: doc.targetHandle
     }));
   }
 
   async create(edge: Edge): Promise<Edge> {
     await this.col.insertOne({ ...edge } as any);
     return edge;
+  }
+
+  async update(id: string, payload: Partial<Pick<Edge, 'label' | 'undirected'>>): Promise<Edge> {
+    await this.col.updateOne({ id } as any, { $set: payload } as any);
+    const updated = await this.col.findOne({ id } as any);
+    if (!updated) {
+      throw new Error(`Edge with ID ${id} not found`);
+    }
+    return {
+      id: updated.id,
+      source: updated.source,
+      target: updated.target,
+      label: updated.label,
+      undirected: updated.undirected,
+      sourceHandle: updated.sourceHandle,
+      targetHandle: updated.targetHandle
+    };
   }
 
   async delete(id: string): Promise<void> {

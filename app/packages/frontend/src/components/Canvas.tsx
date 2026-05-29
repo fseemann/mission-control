@@ -21,6 +21,8 @@ import LabelNode from './LabelNode';
 import RectangleNode from './RectangleNode';
 import MarkdownNode from './MarkdownNode';
 import MilestoneNode from './MilestoneNode';
+import ArchitectureNode from './ArchitectureNode';
+import UseCaseNode from './UseCaseNode';
 
 const nodeTypes = {
   widgetNode: WidgetNode,
@@ -28,6 +30,8 @@ const nodeTypes = {
   rectangleNode: RectangleNode,
   markdownNode: MarkdownNode,
   milestoneNode: MilestoneNode,
+  architectureNode: ArchitectureNode,
+  useCaseNode: UseCaseNode,
 };
 
 const defaultEdgeOptions = {
@@ -44,6 +48,7 @@ const Canvas: React.FC = () => {
   const edges = useWidgetStore((state) => state.edges);
   const selectedWidgetIds = useWidgetStore((state) => state.selectedWidgetIds || []);
   const selectWidget = useWidgetStore((state) => state.selectWidget);
+  const selectEdge = useWidgetStore((state) => state.selectEdge);
   const send = useWidgetStore((state) => state.send);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -93,6 +98,10 @@ const Canvas: React.FC = () => {
             ? 'markdownNode'
             : w.type === 'milestone'
             ? 'milestoneNode'
+            : w.type === 'architecture'
+            ? 'architectureNode'
+            : w.type === 'usecase'
+            ? 'useCaseNode'
             : 'widgetNode';
 
         const existing = existingNodes.get(w._id);
@@ -110,9 +119,9 @@ const Canvas: React.FC = () => {
           dragging: existing?.dragging,
           draggable: !w.locked,
           zIndex: w.style?.zIndex ?? (w.type === 'rectangle' ? 0 : 1),
-          style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown' || w.type === 'milestone') ? {
-            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : w.type === 'milestone' ? 320 : 150),
-            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : w.type === 'milestone' ? 240 : 60),
+          style: (w.type === 'rectangle' || w.type === 'label' || w.type === 'markdown' || w.type === 'milestone' || w.type === 'architecture' || w.type === 'usecase') ? {
+            width: w.style?.width ?? (w.type === 'rectangle' ? 200 : w.type === 'markdown' ? 300 : w.type === 'milestone' ? 320 : w.type === 'architecture' ? 160 : w.type === 'usecase' ? 140 : 150),
+            height: w.style?.height ?? (w.type === 'rectangle' ? 150 : w.type === 'markdown' ? 200 : w.type === 'milestone' ? 240 : w.type === 'architecture' ? 80 : w.type === 'usecase' ? 60 : 60),
           } : undefined,
         } as FlowNode;
       });
@@ -149,6 +158,8 @@ const Canvas: React.FC = () => {
           id: e.id,
           source: e.source,
           target: e.target,
+          sourceHandle: e.sourceHandle,
+          targetHandle: e.targetHandle,
           label: e.label,
           zIndex,
         };
@@ -219,6 +230,51 @@ const Canvas: React.FC = () => {
               borderStyle: 'solid',
               borderRadius: 8,
             },
+          },
+        });
+      } else if (type === 'architectureNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'architecture',
+            label: 'Component',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              width: 160,
+              height: 80,
+              backgroundColor: '#FFFFFF',
+              borderColor: '#6366F1',
+              borderStyle: 'solid',
+              borderRadius: 8,
+              fontSize: 14,
+              color: '#111827',
+            },
+          },
+        });
+      } else if (type === 'useCaseNode') {
+        send({
+          type: 'widget:create',
+          payload: {
+            type: 'usecase',
+            label: 'Use Case',
+            code: '',
+            envVars: [],
+            timeoutMs: 10000,
+            position,
+            style: {
+              width: 140,
+              height: 60,
+              backgroundColor: '#FAF5FF',
+              borderColor: '#A855F7',
+              borderStyle: 'solid',
+              borderRadius: 9999,
+              fontSize: 13,
+              color: '#7E22CE',
+            },
+            useCaseEdges: [],
           },
         });
       } else if (type === 'markdownNode') {
@@ -381,6 +437,8 @@ const Canvas: React.FC = () => {
           id: generateEdgeId(),
           source: connection.source,
           target: connection.target,
+          sourceHandle: connection.sourceHandle,
+          targetHandle: connection.targetHandle,
         },
       });
     },
@@ -410,7 +468,7 @@ const Canvas: React.FC = () => {
       selectedIds.length !== currentIds.length ||
       selectedIds.some((id) => !currentIds.includes(id));
     if (isDifferent) {
-      useWidgetStore.setState({ selectedWidgetIds: selectedIds });
+      useWidgetStore.setState({ selectedWidgetIds: selectedIds, selectedEdgeId: null });
     }
   }, []);
 
@@ -424,7 +482,7 @@ const Canvas: React.FC = () => {
         selectedIds.length !== currentIds.length ||
         selectedIds.some((id) => !currentIds.includes(id));
       if (isDifferent) {
-        useWidgetStore.setState({ selectedWidgetIds: selectedIds });
+        useWidgetStore.setState({ selectedWidgetIds: selectedIds, selectedEdgeId: null });
       }
     }
   }, []);
@@ -432,13 +490,70 @@ const Canvas: React.FC = () => {
   // Handle pane click (closes config panel if clicked outside nodes)
   const onPaneClick = useCallback(() => {
     selectWidget(null);
-  }, [selectWidget]);
+    selectEdge(null);
+  }, [selectWidget, selectEdge]);
+
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: FlowEdge) => {
+    event.stopPropagation();
+    selectEdge(edge.id);
+  }, [selectEdge]);
+
+  // Compute dynamic styles and markers for edges based on selected Use Case nodes
+  const selectedUseCaseNodes = nodes.filter(
+    (n) => n.selected && n.type === 'useCaseNode'
+  );
+  
+  const hasSelectedUseCase = selectedUseCaseNodes.length > 0;
+  const highlightedEdgeIds = new Set<string>();
+  selectedUseCaseNodes.forEach((node) => {
+    const edgeIds = node.data?.useCaseEdges || [];
+    edgeIds.forEach((id: string) => highlightedEdgeIds.add(id));
+  });
+
+  const selectedEdgeId = useWidgetStore((state) => state.selectedEdgeId);
+
+  const styledEdges = rfEdges.map((edge) => {
+    const isHighlighted = highlightedEdgeIds.has(edge.id);
+    const edgeData = edges.find((e) => e.id === edge.id);
+    const isUndirected = edgeData?.undirected;
+    const isSelected = selectedEdgeId === edge.id;
+
+    // Default styling
+    let stroke = isSelected ? 'var(--accent)' : '#9CA3AF';
+    let strokeWidth = isSelected ? 2.5 : 1.5;
+    let animated = false;
+
+    if (hasSelectedUseCase) {
+      if (isHighlighted) {
+        stroke = '#A855F7'; // Purple highlight
+        strokeWidth = 3.5;
+        animated = true;
+      } else {
+        stroke = '#E5E7EB'; // Faded out
+        strokeWidth = 1;
+      }
+    }
+
+    return {
+      ...edge,
+      style: { stroke, strokeWidth },
+      animated,
+      markerEnd: isUndirected
+        ? undefined
+        : {
+            type: 'arrowclosed',
+            width: 16,
+            height: 16,
+            color: stroke,
+          },
+    };
+  });
 
   return (
     <div className="canvas-wrapper" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
-        edges={rfEdges}
+        edges={styledEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onSelectionChange={onSelectionChange}
@@ -453,6 +568,7 @@ const Canvas: React.FC = () => {
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
         onPaneClick={onPaneClick}
+        onEdgeClick={onEdgeClick}
         elevateNodesOnSelect={false}
         defaultViewport={initialViewport}
         fitView={!initialViewport}

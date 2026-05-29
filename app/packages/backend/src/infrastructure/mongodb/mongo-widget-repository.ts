@@ -42,7 +42,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       status: 'idle' as const,
       updatedAt: new Date().toISOString(),
       milestoneItems: data.milestoneItems || [],
-      locked: data.locked ?? false
+      locked: data.locked ?? false,
+      useCaseEdges: data.useCaseEdges || [],
     };
 
     const result = await this.col.insertOne(doc as any);
@@ -87,7 +88,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       'status',
       'lastResult',
       'milestoneItems',
-      'locked'
+      'locked',
+      'useCaseEdges'
     ];
 
     for (const field of fields) {
@@ -175,7 +177,8 @@ export class MongoWidgetRepository implements IWidgetRepository {
       lastResult: doc.lastResult,
       updatedAt: doc.updatedAt,
       milestoneItems: doc.milestoneItems || [],
-      locked: doc.locked ?? false
+      locked: doc.locked ?? false,
+      useCaseEdges: doc.useCaseEdges || []
     };
   }
 }

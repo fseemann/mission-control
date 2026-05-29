@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
-import { Satellite, Target, Activity, Type, Square, FileText, Link, Palette } from 'lucide-react';
+import { Satellite, Target, Activity, Type, Square, FileText, Link, Palette, Network, Layers } from 'lucide-react';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -104,6 +104,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
                 <strong>Markdown</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Rich-text canvas card
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="draggable-widget"
+              draggable
+              onDragStart={(e) => onDragStart(e, 'architectureNode')}
+              title="Drag onto canvas to create an architecture diagram component"
+            >
+              <span className="widget-icon"><Network className="icon" size={16} /></span>
+              <div>
+                <strong>Architecture</strong>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Connectable system block
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="draggable-widget"
+              draggable
+              onDragStart={(e) => onDragStart(e, 'useCaseNode')}
+              title="Drag onto canvas to highlight diagram paths"
+            >
+              <span className="widget-icon"><Layers className="icon animate-pulse" size={16} /></span>
+              <div>
+                <strong>Use Case</strong>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Highlights specific edges
                 </div>
               </div>
             </div>

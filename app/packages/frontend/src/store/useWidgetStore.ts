@@ -5,6 +5,7 @@ interface WidgetStore {
   widgets: Map<string, Widget>;
   edges: Edge[];
   selectedWidgetIds: string[];
+  selectedEdgeId: string | null;
   isConnected: boolean;
   isHelpOpen: boolean;
   helpTab: 'scripting' | 'edges' | 'canvas';
@@ -13,6 +14,7 @@ interface WidgetStore {
   connectWebSocket: () => void;
   send: (msg: ClientMessage) => void;
   selectWidget: (id: string | null) => void;
+  selectEdge: (id: string | null) => void;
   setHelpOpen: (open: boolean, tab?: 'scripting' | 'edges' | 'canvas') => void;
 }
 
@@ -111,10 +113,19 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
               return { edges: [...state.edges, msg.edge] };
             });
             break;
-          case 'edge:deleted':
+          case 'edge:updated':
             set((state) => ({
-              edges: state.edges.filter((e) => e.id !== msg.id),
+              edges: state.edges.map((e) => (e.id === msg.edge.id ? msg.edge : e)),
             }));
+            break;
+          case 'edge:deleted':
+            set((state) => {
+              const nextSelectedEdgeId = state.selectedEdgeId === msg.id ? null : state.selectedEdgeId;
+              return {
+                edges: state.edges.filter((e) => e.id !== msg.id),
+                selectedEdgeId: nextSelectedEdgeId,
+              };
+            });
             break;
           case 'widget:result':
             set((state) => {
@@ -147,6 +158,7 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
     widgets: new Map<string, Widget>(),
     edges: [],
     selectedWidgetIds: [],
+    selectedEdgeId: null,
     isConnected: false,
     isHelpOpen: false,
     helpTab: 'scripting',
@@ -164,7 +176,11 @@ export const useWidgetStore = create<WidgetStore>((set, get) => {
     },
 
     selectWidget: (id: string | null) => {
-      set({ selectedWidgetIds: id ? [id] : [] });
+      set({ selectedWidgetIds: id ? [id] : [], selectedEdgeId: null });
+    },
+
+    selectEdge: (id: string | null) => {
+      set({ selectedEdgeId: id, selectedWidgetIds: [] });
     },
 
     setHelpOpen: (open: boolean, tab?: 'scripting' | 'edges' | 'canvas') => {
