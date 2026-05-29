@@ -1,5 +1,6 @@
 import React from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { Satellite, Target, Activity, Type, Square, FileText, Link, Palette } from 'lucide-react';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -21,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <h2 className="sidebar-title">
-            <span className="widget-icon">🛰️</span>
+            <span className="widget-icon"><Satellite className="icon icon-spin-hover" size={18} /></span>
             Mission Control
           </h2>
         </div>
@@ -35,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'milestoneNode')}
               title="Drag onto canvas to create a new goal milestone"
             >
-              <span className="widget-icon">🎯</span>
+              <span className="widget-icon"><Target className="icon" size={16} /></span>
               <div>
                 <strong>Milestone</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -50,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'widgetNode')}
               title="Drag onto canvas to create a new status"
             >
-              <span className="widget-icon">🟢</span>
+              <span className="widget-icon"><Activity className="icon" size={16} /></span>
               <div>
                 <strong>Status</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -68,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'labelNode')}
               title="Drag onto canvas to create a label annotation"
             >
-              <span className="widget-icon">📝</span>
+              <span className="widget-icon"><Type className="icon" size={16} /></span>
               <div>
                 <strong>Label</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -83,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'rectangleNode')}
               title="Drag onto canvas to create a visual grouping container"
             >
-              <span className="widget-icon">⬜</span>
+              <span className="widget-icon"><Square className="icon" size={16} /></span>
               <div>
                 <strong>Rectangle</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -98,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'markdownNode')}
               title="Drag onto canvas to create a markdown card"
             >
-              <span className="widget-icon">📄</span>
+              <span className="widget-icon"><FileText className="icon" size={16} /></span>
               <div>
                 <strong>Markdown</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -123,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               title="Toggle status widget scripting guide and code examples"
               style={{ marginTop: 0 }}
             >
-              <span>🛰️</span>
+              <Satellite className="icon" size={14} style={{ marginRight: '6px' }} />
               <span>Scripting Guide</span>
             </button>
             <button
@@ -139,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               title="Toggle edge connection and deletion guide"
               style={{ marginTop: 0 }}
             >
-              <span>🔗</span>
+              <Link className="icon" size={14} style={{ marginRight: '6px' }} />
               <span>Edge Connections</span>
             </button>
             <button
@@ -155,7 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               title="Toggle canvas controls, navigation, and shortcuts guide"
               style={{ marginTop: 0 }}
             >
-              <span>🎨</span>
+              <Palette className="icon" size={14} style={{ marginRight: '6px' }} />
               <span>Canvas Guide</span>
             </button>
           </div>

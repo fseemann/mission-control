@@ -2,6 +2,7 @@ import React from 'react';
 import { NodeResizer, NodeProps } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { Lock } from 'lucide-react';
 
 export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -58,8 +59,8 @@ export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         </div>
       )}
       {element.locked && (
-        <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '12px', zIndex: 10 }} title="Locked">
-          🔒
+        <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }} title="Locked">
+          <Lock className="icon lock-icon" size={12} />
         </div>
       )}
     </div>

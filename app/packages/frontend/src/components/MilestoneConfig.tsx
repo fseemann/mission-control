@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Widget, MilestoneItem } from '@mc/shared';
+import { Lock, Save, Trash2, Plus } from 'lucide-react';
 
 interface MilestoneConfigProps {
   widget: Widget;
@@ -141,7 +142,7 @@ export const MilestoneConfig: React.FC<MilestoneConfigProps> = ({
             onChange={(e) => handleLockedChange(e.target.checked)}
             style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
           />
-          <span>🔒 Lock</span>
+          <span><Lock className="icon" size={14} style={{ marginRight: '4px' }} /> Lock</span>
         </label>
       </div>
 
@@ -210,7 +211,7 @@ export const MilestoneConfig: React.FC<MilestoneConfigProps> = ({
                 onClick={() => handleDeleteMilestoneItem(index)}
                 title="Delete item"
               >
-                🗑️
+                <Trash2 className="icon" size={14} />
               </button>
             </div>
           ))}
@@ -221,7 +222,7 @@ export const MilestoneConfig: React.FC<MilestoneConfigProps> = ({
           onClick={handleAddMilestoneItem}
           style={{ marginTop: '4px' }}
         >
-          + Add Sub-task
+          <Plus className="icon" size={14} /> Add Sub-task
         </button>
       </div>
 
@@ -283,13 +284,13 @@ export const MilestoneConfig: React.FC<MilestoneConfigProps> = ({
       {/* Form actions */}
       <div className="config-actions">
         <button type="submit" className="action-btn action-btn-save">
-          💾 Save Config
+          <Save className="icon" size={14} /> Save Config
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
         <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-          🗑️ Delete Milestone
+          <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Milestone
         </button>
       </div>
     </form>

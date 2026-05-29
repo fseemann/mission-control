@@ -3,6 +3,7 @@ import { Widget, EnvVar } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { humanizeCron } from '../utils/cron';
 import { EnvVarTable } from './EnvVarTable';
+import { Lock, HelpCircle, Save, Zap, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface ScriptConfigProps {
   widget: Widget;
@@ -137,7 +138,7 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
             onChange={(e) => handleLockedChange(e.target.checked)}
             style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
           />
-          <span>🔒 Lock</span>
+          <span><Lock className="icon" size={14} style={{ marginRight: '4px' }} /> Lock</span>
         </label>
       </div>
 
@@ -213,7 +214,7 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
             }}
             title="Toggle scripting guide and examples"
           >
-            <span>❓</span>
+            <HelpCircle className="icon" size={12} />
             <span>Help & Examples</span>
           </button>
         </div>
@@ -229,16 +230,16 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
       {/* Form actions */}
       <div className="config-actions">
         <button type="submit" className="action-btn action-btn-save">
-          💾 Save Config
+          <Save className="icon" size={14} /> Save Config
         </button>
         <button type="button" className="action-btn action-btn-run" onClick={handleRunNow}>
-          ⚡ Run Now
+          <Zap className="icon" size={14} /> Run Now
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
         <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-          🗑️ Delete Widget
+          <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Widget
         </button>
       </div>
 
@@ -246,7 +247,7 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
       <details className="result-details" open={!!widget.lastResult}>
         <summary className="result-summary">
           <span>Last Execution Result</span>
-          <span>{widget.lastResult ? '🔽' : '▶️'}</span>
+          <span>{widget.lastResult ? <ChevronDown className="icon" size={14} /> : <ChevronRight className="icon" size={14} />}</span>
         </summary>
         <div className="result-content">
           {widget.lastResult ? (

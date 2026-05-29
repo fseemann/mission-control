@@ -4,6 +4,7 @@ import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { Lock } from 'lucide-react';
 
 export const MarkdownNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -77,8 +78,8 @@ export const MarkdownNode: React.FC<NodeProps<Widget>> = ({ id, data: element, s
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
       {element.locked && (
-        <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '12px', zIndex: 10, background: 'rgba(255,255,255,0.8)', padding: '2px 4px', borderRadius: '4px' }} title="Locked">
-          🔒
+        <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10, background: 'rgba(255,255,255,0.8)', padding: '2px 4px', borderRadius: '4px' }} title="Locked">
+          <Lock className="icon lock-icon" size={12} />
         </div>
       )}
     </div>

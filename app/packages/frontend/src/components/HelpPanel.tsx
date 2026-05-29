@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { Satellite, Link, Palette, X, Info } from 'lucide-react';
 
 const FETCH_EXAMPLE_CODE = `/**
  * Example 1: HTTP Status Inspector
@@ -194,14 +195,25 @@ export const HelpPanel: React.FC = () => {
     <div className={`help-panel ${isHelpOpen ? 'open' : ''}`}>
       <div className="help-header">
         <h3 className="help-title">
-          {helpTab === 'scripting'
-            ? '🛰️ Scripting Guide'
-            : helpTab === 'edges'
-            ? '🔗 Edge Connections'
-            : '🎨 Canvas Guide'}
+          {helpTab === 'scripting' ? (
+            <>
+              <Satellite className="icon" size={16} style={{ marginRight: '6px' }} />
+              Scripting Guide
+            </>
+          ) : helpTab === 'edges' ? (
+            <>
+              <Link className="icon" size={16} style={{ marginRight: '6px' }} />
+              Edge Connections
+            </>
+          ) : (
+            <>
+              <Palette className="icon" size={16} style={{ marginRight: '6px' }} />
+              Canvas Guide
+            </>
+          )}
         </h3>
         <button className="close-btn" onClick={() => setHelpOpen(false)} title="Close Panel">
-          &times;
+          <X className="icon icon-clickable" size={16} />
         </button>
       </div>
 
@@ -211,22 +223,23 @@ export const HelpPanel: React.FC = () => {
           className={`help-tab-btn ${helpTab === 'scripting' ? 'active' : ''}`}
           onClick={() => setHelpOpen(true, 'scripting')}
         >
-          🛰️ Scripting
+          <Satellite className="icon" size={14} style={{ marginRight: '6px' }} /> Scripting
         </button>
         <button
           type="button"
           className={`help-tab-btn ${helpTab === 'edges' ? 'active' : ''}`}
           onClick={() => setHelpOpen(true, 'edges')}
         >
-          🔗 Edges
+          <Link className="icon" size={14} style={{ marginRight: '6px' }} /> Edges
         </button>
         <button
           type="button"
           className={`help-tab-btn ${helpTab === 'canvas' ? 'active' : ''}`}
           onClick={() => setHelpOpen(true, 'canvas')}
         >
-          🎨 Canvas
+          <Palette className="icon" size={14} style={{ marginRight: '6px' }} /> Canvas
         </button>
+
       </div>
 
       <div className="help-body">
@@ -364,7 +377,7 @@ export const HelpPanel: React.FC = () => {
               </div>
               
               <div className="rule-alert" style={{ marginTop: '16px' }}>
-                <span className="rule-alert-icon">ℹ️</span>
+                <span className="rule-alert-icon"><Info className="icon" size={14} /></span>
                 <div>
                   <strong>Connectivity Rule:</strong> Status Widgets can only be connected to Milestones. Connections between status widgets, labels, layout rectangles, or markdown cards are blocked.
                 </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { NodeResizer, NodeProps } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { Lock } from 'lucide-react';
 
 export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -52,7 +53,7 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
       />
       <div>
         {element.label || 'Double-click to edit text'}
-        {element.locked && <span style={{ fontSize: '11px', marginLeft: '6px', opacity: 0.7 }} title="Locked">🔒</span>}
+        {element.locked && <Lock className="icon lock-icon" size={11} style={{ marginLeft: '6px', opacity: 0.7 }} title="Locked" />}
       </div>
     </div>
   );

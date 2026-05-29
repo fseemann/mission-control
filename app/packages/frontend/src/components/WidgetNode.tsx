@@ -3,6 +3,7 @@ import { NodeProps, Handle, Position } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { humanizeCron } from '../utils/cron';
+import { Lock, Clock } from 'lucide-react';
 
 export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -79,7 +80,7 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
         <h4 className="widget-node-title" title={widget.label}>
           {widget.label || 'Status'}
         </h4>
-        {widget.locked && <span style={{ marginLeft: 'auto', fontSize: '12px' }} title="Element is locked">🔒</span>}
+        {widget.locked && <Lock className="icon lock-icon" size={12} style={{ marginLeft: 'auto' }} title="Element is locked" />}
       </div>
 
       <div className="widget-node-meta" style={{ flexDirection: 'column', gap: '4px' }}>
@@ -90,7 +91,7 @@ export const WidgetNode: React.FC<NodeProps<Widget>> = ({ id, data: widget, sele
             title={humanizeCron(widget.cronExpression)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}
           >
-            ⏱️ {humanizeCron(widget.cronExpression)}
+            <Clock className="icon" size={11} style={{ marginRight: '3px' }} /> {humanizeCron(widget.cronExpression)}
           </span>
         )}
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { EnvVar, Widget } from '@mc/shared';
+import { Trash2, Plus } from 'lucide-react';
 
 interface EnvVarTableProps {
   envVars: EnvVar[];
@@ -91,7 +92,7 @@ export const EnvVarTable: React.FC<EnvVarTableProps> = ({
                     onClick={() => handleDeleteEnvRow(i)}
                     title="Remove Variable"
                   >
-                    🗑️
+                    <Trash2 className="icon" size={14} />
                   </button>
                 </td>
               </tr>
@@ -100,7 +101,7 @@ export const EnvVarTable: React.FC<EnvVarTableProps> = ({
         </tbody>
       </table>
       <button type="button" className="add-row-btn" onClick={handleAddEnvRow}>
-        + Add Variable
+        <Plus className="icon" size={14} /> Add Variable
       </button>
     </div>
   );

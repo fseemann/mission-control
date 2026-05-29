@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Widget } from '@mc/shared';
+import { Lock, Save, Trash2 } from 'lucide-react';
 
 interface MarkdownConfigProps {
   widget: Widget;
@@ -145,7 +146,7 @@ export const MarkdownConfig: React.FC<MarkdownConfigProps> = ({
             onChange={(e) => handleLockedChange(e.target.checked)}
             style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
           />
-          <span>🔒 Lock</span>
+          <span><Lock className="icon" size={14} style={{ marginRight: '4px' }} /> Lock</span>
         </label>
       </div>
 
@@ -377,13 +378,13 @@ export const MarkdownConfig: React.FC<MarkdownConfigProps> = ({
       {/* Form actions */}
       <div className="config-actions">
         <button type="submit" className="action-btn action-btn-save">
-          💾 Save Config
+          <Save className="icon" size={14} /> Save Config
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
         <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-          🗑️ Delete Markdown
+          <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Markdown
         </button>
       </div>
     </form>

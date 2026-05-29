@@ -2,6 +2,7 @@ import React from 'react';
 import { NodeResizer, NodeProps, Handle, Position } from 'reactflow';
 import { Widget } from '@mc/shared';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { Lock } from 'lucide-react';
 
 export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, selected }) => {
   const selectWidget = useWidgetStore((state) => state.selectWidget);
@@ -135,7 +136,7 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         <h4 className="milestone-node-title" title={element.label}>
           {element.label || 'Goal Milestone'}
         </h4>
-        {element.locked && <span style={{ marginRight: '6px', fontSize: '12px' }} title="Locked">🔒</span>}
+        {element.locked && <Lock className="icon lock-icon" size={12} style={{ marginRight: '6px' }} title="Locked" />}
         {renderHealthBadge()}
       </div>
 

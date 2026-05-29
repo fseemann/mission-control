@@ -1,5 +1,6 @@
 import React from 'react';
 import { Widget } from '@mc/shared';
+import { X, Trash2, Boxes } from 'lucide-react';
 
 interface BulkActionPanelProps {
   selectedWidgetIds: string[];
@@ -51,12 +52,12 @@ export const BulkActionPanel: React.FC<BulkActionPanelProps> = ({
       <div className="config-header">
         <h3 className="config-title">Bulk Actions</h3>
         <button className="close-btn" onClick={() => selectWidget(null)} title="Close Panel">
-          &times;
+          <X className="icon icon-clickable" size={16} />
         </button>
       </div>
       <div className="config-body">
         <div className="bulk-selection-summary">
-          <span style={{ fontSize: '28px', display: 'block', marginBottom: '8px' }}>📦</span>
+          <Boxes className="icon" size={28} style={{ display: 'block', marginBottom: '8px', color: 'var(--accent)' }} />
           <div className="bulk-selection-count">
             <strong>{selectedWidgets.length} elements selected</strong>
           </div>
@@ -76,7 +77,7 @@ export const BulkActionPanel: React.FC<BulkActionPanelProps> = ({
             }}
             onClick={handleBulkDelete}
           >
-            🗑️ Delete Selection
+            <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Selection
           </button>
         </div>
       </div>

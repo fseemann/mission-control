@@ -164,8 +164,35 @@ body, html, #root {
 }
 
 .widget-icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.icon-clickable {
+  cursor: pointer;
+}
+
+.icon-clickable:hover {
+  color: var(--accent);
+}
+
+/* Micro-animations */
+.icon-spin-hover:hover {
+  transform: rotate(30deg);
+}
+
+.icon-wiggle-hover:hover {
+  transform: rotate(-8deg) scale(1.05);
+}
+
 
 /* Collapse Toggle Button (for Sidebar) */
 .sidebar-toggle-btn {
