@@ -639,7 +639,6 @@ body, html, #root {
 .result-details {
   border: 1px solid #E5E7EB;
   border-radius: 8px;
-  overflow: hidden;
   background: #F9FAFB;
 }
 
