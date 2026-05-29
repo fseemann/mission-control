@@ -53,7 +53,7 @@ export const LabelNode: React.FC<NodeProps<Widget>> = ({ id, data: element, sele
       />
       <div>
         {element.label || 'Double-click to edit text'}
-        {element.locked && <Lock className="icon lock-icon" size={11} style={{ marginLeft: '6px', opacity: 0.7 }} title="Locked" />}
+        {element.locked && <Lock className="icon lock-icon icon-lock" size={11} style={{ marginLeft: '6px', opacity: 0.7 }} title="Locked" />}
       </div>
     </div>
   );

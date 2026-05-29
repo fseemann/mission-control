@@ -77,7 +77,7 @@ export const BulkActionPanel: React.FC<BulkActionPanelProps> = ({
             }}
             onClick={handleBulkDelete}
           >
-            <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Selection
+            <Trash2 className="icon icon-delete icon-wiggle-hover" size={14} /> Delete Selection
           </button>
         </div>
       </div>

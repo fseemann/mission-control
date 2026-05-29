@@ -79,7 +79,7 @@ export const MarkdownNode: React.FC<NodeProps<Widget>> = ({ id, data: element, s
       />
       {element.locked && (
         <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10, background: 'rgba(255,255,255,0.8)', padding: '2px 4px', borderRadius: '4px' }} title="Locked">
-          <Lock className="icon lock-icon" size={12} />
+          <Lock className="icon lock-icon icon-lock" size={12} />
         </div>
       )}
     </div>

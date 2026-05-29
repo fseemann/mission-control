@@ -193,6 +193,27 @@ body, html, #root {
   transform: rotate(-8deg) scale(1.05);
 }
 
+/* Icon Colors */
+.icon-delete {
+  color: var(--status-fail);
+}
+.icon-run {
+  color: var(--status-degraded);
+}
+.icon-target {
+  color: #EF4444;
+}
+.icon-status {
+  color: var(--status-ok);
+}
+.icon-lock {
+  color: #D97706;
+}
+.icon-info {
+  color: var(--accent);
+}
+
+
 
 /* Collapse Toggle Button (for Sidebar) */
 .sidebar-toggle-btn {

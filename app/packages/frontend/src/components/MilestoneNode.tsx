@@ -136,7 +136,7 @@ export const MilestoneNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
         <h4 className="milestone-node-title" title={element.label}>
           {element.label || 'Goal Milestone'}
         </h4>
-        {element.locked && <Lock className="icon lock-icon" size={12} style={{ marginRight: '6px' }} title="Locked" />}
+        {element.locked && <Lock className="icon lock-icon icon-lock" size={12} style={{ marginRight: '6px' }} title="Locked" />}
         {renderHealthBadge()}
       </div>
 

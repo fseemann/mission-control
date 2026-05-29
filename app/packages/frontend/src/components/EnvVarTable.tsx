@@ -92,7 +92,7 @@ export const EnvVarTable: React.FC<EnvVarTableProps> = ({
                     onClick={() => handleDeleteEnvRow(i)}
                     title="Remove Variable"
                   >
-                    <Trash2 className="icon" size={14} />
+                    <Trash2 className="icon icon-delete" size={14} />
                   </button>
                 </td>
               </tr>

@@ -377,7 +377,7 @@ export const HelpPanel: React.FC = () => {
               </div>
               
               <div className="rule-alert" style={{ marginTop: '16px' }}>
-                <span className="rule-alert-icon"><Info className="icon" size={14} /></span>
+                <span className="rule-alert-icon"><Info className="icon icon-info" size={14} /></span>
                 <div>
                   <strong>Connectivity Rule:</strong> Status Widgets can only be connected to Milestones. Connections between status widgets, labels, layout rectangles, or markdown cards are blocked.
                 </div>

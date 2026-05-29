@@ -60,7 +60,7 @@ export const RectangleNode: React.FC<NodeProps<Widget>> = ({ id, data: element, 
       )}
       {element.locked && (
         <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }} title="Locked">
-          <Lock className="icon lock-icon" size={12} />
+          <Lock className="icon lock-icon icon-lock" size={12} />
         </div>
       )}
     </div>

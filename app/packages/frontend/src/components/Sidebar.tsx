@@ -36,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'milestoneNode')}
               title="Drag onto canvas to create a new goal milestone"
             >
-              <span className="widget-icon"><Target className="icon" size={16} /></span>
+              <span className="widget-icon"><Target className="icon icon-target" size={16} /></span>
               <div>
                 <strong>Milestone</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -51,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
               onDragStart={(e) => onDragStart(e, 'widgetNode')}
               title="Drag onto canvas to create a new status"
             >
-              <span className="widget-icon"><Activity className="icon" size={16} /></span>
+              <span className="widget-icon"><Activity className="icon icon-status" size={16} /></span>
               <div>
                 <strong>Status</strong>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>

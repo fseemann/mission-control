@@ -138,7 +138,7 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
             onChange={(e) => handleLockedChange(e.target.checked)}
             style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
           />
-          <span><Lock className="icon" size={14} style={{ marginRight: '4px' }} /> Lock</span>
+          <span><Lock className="icon icon-lock" size={14} style={{ marginRight: '4px' }} /> Lock</span>
         </label>
       </div>
 
@@ -214,7 +214,7 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
             }}
             title="Toggle scripting guide and examples"
           >
-            <HelpCircle className="icon" size={12} />
+            <HelpCircle className="icon icon-info" size={12} />
             <span>Help & Examples</span>
           </button>
         </div>
@@ -233,13 +233,13 @@ export const ScriptConfig: React.FC<ScriptConfigProps> = ({
           <Save className="icon" size={14} /> Save Config
         </button>
         <button type="button" className="action-btn action-btn-run" onClick={handleRunNow}>
-          <Zap className="icon" size={14} /> Run Now
+          <Zap className="icon icon-run" size={14} /> Run Now
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
         <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-          <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Widget
+          <Trash2 className="icon icon-delete icon-wiggle-hover" size={14} /> Delete Widget
         </button>
       </div>
 

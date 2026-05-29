@@ -132,7 +132,7 @@ export const LabelConfig: React.FC<LabelConfigProps> = ({
             onChange={(e) => handleLockedChange(e.target.checked)}
             style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
           />
-          <span><Lock className="icon" size={14} style={{ marginRight: '4px' }} /> Lock</span>
+          <span><Lock className="icon icon-lock" size={14} style={{ marginRight: '4px' }} /> Lock</span>
         </label>
       </div>
 
@@ -279,7 +279,7 @@ export const LabelConfig: React.FC<LabelConfigProps> = ({
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '-6px' }}>
         <button type="button" className="action-btn action-btn-delete" onClick={handleDeleteWidget}>
-          <Trash2 className="icon icon-wiggle-hover" size={14} /> Delete Label
+          <Trash2 className="icon icon-delete icon-wiggle-hover" size={14} /> Delete Label
         </button>
       </div>
     </form>
