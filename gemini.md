@@ -45,4 +45,8 @@ cd app
 bun test
 ```
 
+## Git & Workflow Guidelines
+
+* **Never commit without human approval**: Do not execute Git commits automatically. Always request explicit confirmation before staging or committing changes.
+
 
