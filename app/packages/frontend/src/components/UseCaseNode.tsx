@@ -65,12 +65,9 @@ export const UseCaseNode: React.FC<NodeProps<Widget>> = ({ id, data: element, se
         onResizeEnd={onResizeEnd}
       />
       
-      {/* Bidirectional handles (overlapping target and source) */}
-      <Handle type="target" position={Position.Left} id="uc_l_in" style={{ background: '#A855F7', width: '8px', height: '8px', zIndex: 10 }} />
-      <Handle type="source" position={Position.Left} id="uc_l_out" style={{ background: '#C084FC', width: '8px', height: '8px', zIndex: 9 }} />
-      
-      <Handle type="target" position={Position.Right} id="uc_r_in" style={{ background: '#A855F7', width: '8px', height: '8px', zIndex: 10 }} />
-      <Handle type="source" position={Position.Right} id="uc_r_out" style={{ background: '#C084FC', width: '8px', height: '8px', zIndex: 9 }} />
+      {/* Handles: Left (Target) and Right (Source) only */}
+      <Handle type="target" position={Position.Left} id="uc_in" style={{ background: '#A855F7', width: '8px', height: '8px' }} />
+      <Handle type="source" position={Position.Right} id="uc_out" style={{ background: '#C084FC', width: '8px', height: '8px' }} />
 
       <div style={{ wordBreak: 'break-word', userSelect: 'none', lineHeight: 1.2 }}>
         {element.label || 'Use Case'}
